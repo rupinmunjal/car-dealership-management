@@ -1,0 +1,19 @@
+{
+  "hosting": {
+    "public": "dist/webapp/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "springboot-app",
+          "region": "northamerica-northeast2"
+        }
+      }
+    ]
+  }
+}

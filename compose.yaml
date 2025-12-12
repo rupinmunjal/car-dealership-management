@@ -1,0 +1,110 @@
+# Docker Compose Template (Adapted for Spring Boot + Angular + Postgres)
+# Multi-Environment Deployment Configuration
+# ============================================
+
+services:
+  # ==========================================
+  # STAGING ENVIRONMENT
+  # ==========================================
+  # Purpose: Testing new features before production
+  # URL: http://localhost:5000
+  # ==========================================
+  staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: car-dealership-staging
+    ports:
+      # Maps Host 5000 -> Container 8080 (Spring Boot default)
+      - "5000:8080"
+    environment:
+      # Spring Boot Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
+      - SPRING_DATASOURCE_USERNAME=cars
+      - SPRING_DATASOURCE_PASSWORD=dealer
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # Ensure Health Endpoint is exposed for Docker Healthcheck
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      # Checks the Spring Boot Actuator Health Endpoint
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ==========================================
+  # PRODUCTION ENVIRONMENT
+  # ==========================================
+  # Purpose: Stable release for end users
+  # URL: http://localhost:6001
+  # ==========================================
+  production:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: car-dealership-production
+    ports:
+      # Maps Host 6001 -> Container 8080 (Spring Boot default)
+      - "6001:8080"
+    environment:
+      # Spring Boot Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
+      - SPRING_DATASOURCE_USERNAME=cars
+      - SPRING_DATASOURCE_PASSWORD=dealer
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate  # Production usually validates schema, doesn't update
+      # Ensure Health Endpoint is exposed
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ==========================================
+  # DATABASE SERVICE (Required)
+  # ==========================================
+  database:
+    image: postgres:16-alpine
+    container_name: car-dealership-db
+    environment:
+      - POSTGRES_USER=cars
+      - POSTGRES_PASSWORD=dealer
+      - POSTGRES_DB=carsdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "cars" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+# ==========================================
+# NETWORKS
+# ==========================================
+networks:
+  app-network:
+    driver: bridge
+
+# ==========================================
+# VOLUMES
+# ==========================================
+volumes:
+  db-data:
