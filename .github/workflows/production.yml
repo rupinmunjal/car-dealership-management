@@ -1,0 +1,113 @@
+name: Production Deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run All Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Test
+        run: mvn verify
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # Basic check for hardcoded secrets
+      - name: Check for hardcoded secrets
+        run: |
+          if grep -rn "password\s*=\s*['\"]" --include="*.java" . 2>/dev/null; then
+            echo "⚠️ WARNING: Potential hardcoded password found!"
+          else
+            echo "✅ No obvious hardcoded passwords found"
+          fi
+
+  production-docker:
+    name: Production Docker Build & Verify
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and start production container
+        run: |
+          docker compose build production
+          docker compose up production -d
+          echo "Waiting 20s for Spring Boot to start..."
+          sleep 20
+
+      - name: Verify production deployment
+        run: |
+          echo "Checking production health endpoint..."
+          curl -f http://localhost:6001/actuator/health || exit 1
+          echo "✅ Production deployment verified!"
+
+      - name: Verify production security
+        run: |
+          # Check that detailed errors are not exposed
+          RESPONSE=$(curl -s http://localhost:6001/nonexistent-endpoint-12345)
+          if echo "$RESPONSE" | grep -qi "stack\|trace\|exception"; then
+            echo "⚠️ WARNING: Stack traces may be exposed in production!"
+          else
+            echo "✅ No stack traces exposed in error responses"
+          fi
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests against production..."
+          
+          # 1. Verify Health
+          STATUS=$(curl -s http://localhost:6001/actuator/health | grep "UP")
+          if [ -z "$STATUS" ]; then echo "❌ Health check failed"; exit 1; fi
+          
+          # 2. Verify Index
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost:6001/index.html)
+          if [ "$HTTP_CODE" != "200" ]; then echo "❌ Index page failed (Code: $HTTP_CODE)"; exit 1; fi
+          
+          echo "✅ Smoke tests passed!"
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down
+
+  production-summary:
+    name: Production Summary
+    runs-on: ubuntu-latest
+    needs: [test, security, production-docker]
+    
+    steps:
+      - name: Create Release Summary
+        run: |
+          echo "============================================"
+          echo "  PRODUCTION DEPLOYMENT READY"
+          echo "============================================"
+          echo "  Branch:      main"
+          echo "  Environment: PRODUCTION"
+          echo "  Port:        6001"
+          echo "============================================"
