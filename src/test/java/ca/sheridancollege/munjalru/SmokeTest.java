@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 // Add this import for the controller check
 import ca.sheridancollege.munjalru.config.SecurityConfig; 
@@ -14,13 +15,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class SmokeTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private SecurityConfig securityConfig; // Inject a bean to verify it loaded
+    private SecurityConfig securityConfig;
 
     // TEST 1: Context Loads
     @Test
@@ -31,7 +33,6 @@ public class SmokeTest {
     // TEST 2: Controller/Config Injection
     @Test
     public void securityConfigShouldLoad() {
-        // Verifies that your core beans are being created
         assertThat(securityConfig).isNotNull();
     }
 

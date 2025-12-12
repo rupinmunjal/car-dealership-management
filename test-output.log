@@ -1,0 +1,226 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/home/rupin/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< ca.sheridancollege.munjalru:A2 >-------------------
+[INFO] Building A2 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ A2 ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ A2 ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ A2 ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ A2 ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 4 source files with javac [debug parameters target 21] to target/test-classes
+[WARNING] location of system modules is not set in conjunction with -source 21
+  not setting the location of system modules may lead to class files that cannot run on JDK 21
+    --release 21 is recommended instead of -source 21 -target 21 because it sets the location of system modules automatically
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ A2 ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running ca.sheridancollege.munjalru.A2ApplicationTests
+14:56:31.976 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [ca.sheridancollege.munjalru.A2ApplicationTests]: A2ApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+14:56:32.040 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration ca.sheridancollege.munjalru.A2Application for test class ca.sheridancollege.munjalru.A2ApplicationTests
+14:56:32.113 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2025-12-12T14:56:32.270-05:00  INFO 14386 --- [           main] c.s.munjalru.A2ApplicationTests          : Starting A2ApplicationTests using Java 25.0.1 with PID 14386 (started by rupin in /home/rupin/Documents/Sheridan/Semester 5/PROG39599 - Advanced Java Frameworks/Assignments/A2)
+2025-12-12T14:56:32.271-05:00  INFO 14386 --- [           main] c.s.munjalru.A2ApplicationTests          : The following 1 profile is active: "test"
+2025-12-12T14:56:32.768-05:00  INFO 14386 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-12T14:56:32.802-05:00  INFO 14386 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 28 ms. Found 3 JPA repository interfaces.
+2025-12-12T14:56:33.079-05:00  INFO 14386 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-12T14:56:33.106-05:00  INFO 14386 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-12-12T14:56:33.121-05:00  INFO 14386 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-12-12T14:56:33.264-05:00  INFO 14386 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-12T14:56:33.278-05:00  INFO 14386 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-12-12T14:56:33.374-05:00  INFO 14386 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2025-12-12T14:56:33.375-05:00  INFO 14386 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-12-12T14:56:33.387-05:00  WARN 14386 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-12T14:56:33.398-05:00  INFO 14386 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-12-12T14:56:33.821-05:00  INFO 14386 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists _user cascade 
+Hibernate: drop table if exists car cascade 
+Hibernate: drop table if exists dealer cascade 
+Hibernate: create table _user (id bigint generated by default as identity, email varchar(255), password varchar(255), role enum ('ADMIN','USER'), primary key (id))
+Hibernate: create table car (model_year integer, dealer_id bigint, id bigint generated by default as identity, make varchar(255), model varchar(255), primary key (id))
+Hibernate: create table dealer (id bigint generated by default as identity, location varchar(255), name varchar(255), primary key (id))
+Hibernate: alter table if exists car add constraint FK1qth0v8qrq01cc9lk55xmhd7 foreign key (dealer_id) references dealer
+2025-12-12T14:56:33.857-05:00  INFO 14386 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-12T14:56:34.053-05:00  INFO 14386 --- [           main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-12-12T14:56:34.053-05:00  WARN 14386 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-12-12T14:56:34.143-05:00  WARN 14386 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-12T14:56:34.165-05:00  INFO 14386 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-12-12T14:56:34.358-05:00  INFO 14386 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-12-12T14:56:34.569-05:00  WARN 14386 --- [           main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-12-12T14:56:34.661-05:00  INFO 14386 --- [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2025-12-12T14:56:34.715-05:00  INFO 14386 --- [           main] c.s.munjalru.A2ApplicationTests          : Started A2ApplicationTests in 2.609 seconds (process running for 3.07)
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/home/rupin/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.122 s -- in ca.sheridancollege.munjalru.A2ApplicationTests
+[INFO] Running ca.sheridancollege.munjalru.FunctionalTest
+2025-12-12T14:56:35.034-05:00  INFO 14386 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [ca.sheridancollege.munjalru.FunctionalTest]: FunctionalTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-12-12T14:56:35.038-05:00  INFO 14386 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration ca.sheridancollege.munjalru.A2Application for test class ca.sheridancollege.munjalru.FunctionalTest
+2025-12-12T14:56:35.040-05:00  INFO 14386 --- [           main] o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2025-12-12T14:56:35.052-05:00  INFO 14386 --- [           main] c.s.munjalru.FunctionalTest              : Starting FunctionalTest using Java 25.0.1 with PID 14386 (started by rupin in /home/rupin/Documents/Sheridan/Semester 5/PROG39599 - Advanced Java Frameworks/Assignments/A2)
+2025-12-12T14:56:35.052-05:00  INFO 14386 --- [           main] c.s.munjalru.FunctionalTest              : The following 1 profile is active: "test"
+2025-12-12T14:56:35.174-05:00  INFO 14386 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-12T14:56:35.179-05:00  INFO 14386 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 4 ms. Found 3 JPA repository interfaces.
+2025-12-12T14:56:35.223-05:00  INFO 14386 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-12T14:56:35.224-05:00  INFO 14386 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-12-12T14:56:35.227-05:00  INFO 14386 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-12T14:56:35.228-05:00  INFO 14386 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2025-12-12T14:56:35.228-05:00  INFO 14386 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:testdb user=SA
+2025-12-12T14:56:35.228-05:00  INFO 14386 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2025-12-12T14:56:35.229-05:00  WARN 14386 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-12T14:56:35.229-05:00  INFO 14386 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-12-12T14:56:35.243-05:00  INFO 14386 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists _user cascade 
+Hibernate: drop table if exists car cascade 
+Hibernate: drop table if exists dealer cascade 
+Hibernate: create table _user (id bigint generated by default as identity, email varchar(255), password varchar(255), role enum ('ADMIN','USER'), primary key (id))
+Hibernate: create table car (model_year integer, dealer_id bigint, id bigint generated by default as identity, make varchar(255), model varchar(255), primary key (id))
+Hibernate: create table dealer (id bigint generated by default as identity, location varchar(255), name varchar(255), primary key (id))
+Hibernate: alter table if exists car add constraint FK1qth0v8qrq01cc9lk55xmhd7 foreign key (dealer_id) references dealer
+2025-12-12T14:56:35.248-05:00  INFO 14386 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-12T14:56:35.280-05:00  INFO 14386 --- [           main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-12-12T14:56:35.280-05:00  WARN 14386 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-12-12T14:56:35.302-05:00  WARN 14386 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-12T14:56:35.307-05:00  INFO 14386 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-12-12T14:56:35.355-05:00  INFO 14386 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-12-12T14:56:35.400-05:00  WARN 14386 --- [           main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-12-12T14:56:35.425-05:00  INFO 14386 --- [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2025-12-12T14:56:35.451-05:00  INFO 14386 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2025-12-12T14:56:35.451-05:00  INFO 14386 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2025-12-12T14:56:35.452-05:00  INFO 14386 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2025-12-12T14:56:35.466-05:00  INFO 14386 --- [           main] c.s.munjalru.FunctionalTest              : Started FunctionalTest in 0.426 seconds (process running for 3.82)
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/unknown-private-endpoint
+       Parameters = {}
+          Headers = []
+             Body = null
+    Session Attrs = {}
+
+Handler:
+             Type = null
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 403
+    Error message = Forbidden
+          Headers = [Vary:"Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0"]
+     Content type = null
+             Body = 
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+[ERROR] Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.499 s <<< FAILURE! -- in ca.sheridancollege.munjalru.FunctionalTest
+[ERROR] ca.sheridancollege.munjalru.FunctionalTest.shouldProtectPrivateApi -- Time elapsed: 0.009 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<401> but was:<403>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:640)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at ca.sheridancollege.munjalru.FunctionalTest.shouldProtectPrivateApi(FunctionalTest.java:33)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running ca.sheridancollege.munjalru.PerformanceTest
+2025-12-12T14:56:35.533-05:00  INFO 14386 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [ca.sheridancollege.munjalru.PerformanceTest]: PerformanceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-12-12T14:56:35.535-05:00  INFO 14386 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration ca.sheridancollege.munjalru.A2Application for test class ca.sheridancollege.munjalru.PerformanceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.064 s -- in ca.sheridancollege.munjalru.PerformanceTest
+[INFO] Running ca.sheridancollege.munjalru.SmokeTest
+2025-12-12T14:56:35.599-05:00  INFO 14386 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [ca.sheridancollege.munjalru.SmokeTest]: SmokeTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-12-12T14:56:35.600-05:00  INFO 14386 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration ca.sheridancollege.munjalru.A2Application for test class ca.sheridancollege.munjalru.SmokeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in ca.sheridancollege.munjalru.SmokeTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   FunctionalTest.shouldProtectPrivateApi:33 Status expected:<401> but was:<403>
+[INFO] 
+[ERROR] Tests run: 9, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.340 s
+[INFO] Finished at: 2025-12-12T14:56:35-05:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project A2: There are test failures.
+[ERROR] 
+[ERROR] See /home/rupin/Documents/Sheridan/Semester 5/PROG39599 - Advanced Java Frameworks/Assignments/A2/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class FunctionalTest {
 
     @Autowired
@@ -24,16 +26,13 @@ public class FunctionalTest {
     }
 
     // TEST 2: Protected Endpoint (Should Fail/Redirect)
-    // This proves your Security Config is actually working
     @Test
     public void shouldProtectPrivateApi() throws Exception {
         mockMvc.perform(get("/api/v1/unknown-private-endpoint"))
-                .andExpect(status().isUnauthorized()); // Expects 401 Unauthorized
-                // Note: If you configured it to return 403, change to .isForbidden()
+                .andExpect(status().isForbidden()); // Expects 403 Forbidden (Spring Security default for anonymous users)
     }
 
     // TEST 3: Static Resources (CSS/JS)
-    // This proves Angular assets are being served
     @Test
     public void shouldLoadRootPath() throws Exception {
         mockMvc.perform(get("/"))
