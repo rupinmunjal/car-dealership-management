@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "node init && ng serve",
+    "build": "node init && ng build",
     "postbuild": "npm run deploy",
     "predeploy": "rimraf ../resources/static/ && mkdirp ../resources/static",
     "deploy": "copyfiles -f dist/webapp/browser/*.* ../resources/static",
