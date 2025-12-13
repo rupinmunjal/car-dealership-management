@@ -8,3 +8,15 @@ spring:
     url: jdbc:postgresql://ajf:5432/carsdb
     username: cars
     password: dealer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    defaults:
+      enabled: true

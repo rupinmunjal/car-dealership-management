@@ -60,23 +60,50 @@ jobs:
           docker compose build production
           docker compose up -d production database
 
-      - name: Wait for production to be healthy
+      - name: Wait for services to be ready
         run: |
-          echo "Waiting for production container to be healthy..."
-          timeout 120 bash -c 'until docker inspect car-dealership-production --format="{{.State.Health.Status}}" 2>/dev/null | grep -q "healthy"; do echo "Waiting for health check..."; sleep 5; done' || {
-            echo "❌ Container did not become healthy in time"
-            echo "=== Production Logs ==="
-            docker compose logs production
-            echo "=== Database Logs ==="
-            docker compose logs database
-            exit 1
-          }
-          echo "✅ Container is healthy!"
+          echo "Waiting for database to be healthy..."
+          timeout 60 bash -c 'until docker inspect car-dealership-db --format="{{.State.Health.Status}}" 2>/dev/null | grep -q "healthy"; do echo "Waiting for database..."; sleep 3; done'
+          echo "✅ Database is healthy!"
           
-      - name: Show container status
+          echo ""
+          echo "Waiting for production container to start (max 90 seconds)..."
+          
+          for i in {1..18}; do
+            STATUS=$(docker inspect car-dealership-production --format="{{.State.Status}}" 2>/dev/null || echo "unknown")
+            HEALTH=$(docker inspect car-dealership-production --format="{{.State.Health.Status}}" 2>/dev/null || echo "none")
+            
+            echo "Attempt $i/18: Status=$STATUS, Health=$HEALTH"
+            
+            if [ "$STATUS" = "running" ] && [ "$HEALTH" = "healthy" ]; then
+              echo "✅ Container is running and healthy!"
+              break
+            fi
+            
+            if [ "$STATUS" = "restarting" ] || [ "$STATUS" = "exited" ]; then
+              echo "❌ Container is $STATUS - showing logs:"
+              docker compose logs production
+              exit 1
+            fi
+            
+            sleep 5
+          done
+          
+          # Final check
+          STATUS=$(docker inspect car-dealership-production --format="{{.State.Status}}" 2>/dev/null)
+          if [ "$STATUS" != "running" ]; then
+            echo "❌ Container failed to start properly"
+            docker compose logs production
+            exit 1
+          fi
+          
+      - name: Show container status and logs
         run: |
+          echo "=== Container Status ==="
           docker compose ps
-          docker compose logs --tail=50 production
+          echo ""
+          echo "=== Production Logs (last 100 lines) ==="
+          docker compose logs --tail=100 production
 
       - name: Verify production deployment
         run: |
