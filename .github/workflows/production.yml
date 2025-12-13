@@ -59,8 +59,16 @@ jobs:
         run: |
           docker compose build production
           docker compose up production -d
-          echo "Waiting 20s for Spring Boot to start..."
-          sleep 20
+
+      - name: Wait for production to be healthy
+        run: |
+          echo "Waiting for production container to be healthy..."
+          timeout 120 bash -c 'until docker inspect car-dealership-production --format="{{.State.Health.Status}}" 2>/dev/null | grep -q "healthy"; do echo "Waiting for health check..."; sleep 5; done' || {
+            echo "❌ Container did not become healthy in time"
+            docker compose logs production
+            exit 1
+          }
+          echo "✅ Container is healthy!"
 
       - name: Verify production deployment
         run: |
