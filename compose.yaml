@@ -58,7 +58,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
       - SPRING_DATASOURCE_USERNAME=cars
       - SPRING_DATASOURCE_PASSWORD=dealer
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate  # Production usually validates schema, doesn't update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update  # For Docker environment, auto-create schema
       # Ensure Health Endpoint is exposed
       - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health
     depends_on:
