@@ -1,0 +1,33 @@
+{
+  "testDataInfo": "Test data for Car Dealership Management System",
+  "note": "Tests currently use inline data. This file serves as reference documentation.",
+  
+  "sampleCar": {
+    "make": "Toyota",
+    "model": "Camry",
+    "modelYear": 2024
+  },
+  
+  "sampleDealer": {
+    "name": "Test Dealer",
+    "location": "Toronto, ON"
+  },
+  
+  "sampleUser": {
+    "email": "user@example.com",
+    "password": "SecurePass123!"
+  },
+  
+  "securityTestCases": {
+    "sqlInjection": {
+      "description": "SQL Injection in car make",
+      "input": "'; DROP TABLE cars; --",
+      "expectedBehavior": "Should be sanitized or stored safely"
+    },
+    "xssInjection": {
+      "description": "XSS in dealer name",
+      "input": "<script>alert('XSS')</script>",
+      "expectedBehavior": "Should be escaped or rejected"
+    }
+  }
+}
