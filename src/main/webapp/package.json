@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "node api.js && ng serve",
     "build": "ng build",
     "postbuild": "npm run deploy",
     "predeploy": "rimraf ../resources/static/ && mkdirp ../resources/static",
