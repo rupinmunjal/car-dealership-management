@@ -11,7 +11,7 @@ A full-stack web application for managing car dealerships, built with Spring Boo
 - **Responsive UI**: Modern Angular frontend with responsive design
 - **Database**: PostgreSQL for reliable data persistence
 - **Docker Support**: Containerized deployment for staging and production environments
-- **Health Monitoring**: Spring Boot Actuator for application health checks
+- **Real-time Health Monitoring**: Spring Boot Actuator with frontend health indicator displaying system status
 
 ## 🛠️ Technology Stack
 
@@ -184,6 +184,7 @@ car-dealership-management/
 │   │   └── webapp/                         # Angular frontend
 │   │       ├── src/
 │   │       │   ├── app/
+│   │       │   │   ├── components/         # Reusable components
 │   │       │   │   ├── guards/             # Route guards
 │   │       │   │   ├── interceptors/       # HTTP interceptors
 │   │       │   │   ├── pages/              # Page components
@@ -192,6 +193,7 @@ car-dealership-management/
 │   │       │   ├── main.ts
 │   │       │   └── styles.css
 │   │       ├── angular.json
+│   │       ├── proxy-conf.json             # Dev server proxy config
 │   │       └── package.json
 │   └── test/                               # Test files
 ├── compose.yaml                             # Docker Compose configuration
@@ -231,6 +233,100 @@ The application uses JWT (JSON Web Tokens) for authentication and authorization:
 
 ### Health Check
 - `GET /actuator/health` - Application health status
+
+## 🏥 Health Monitoring
+
+The application includes a comprehensive health monitoring system that provides real-time visibility into the application's status.
+
+### Backend - Spring Boot Actuator
+
+The health endpoint is configured in `application.yml`:
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    defaults:
+      enabled: true
+```
+
+**Endpoint**: `GET /actuator/health`
+
+**Response Example**:
+```json
+{
+  "status": "UP"
+}
+```
+
+### Frontend - Real-time Health Indicator
+
+The Angular frontend includes a health indicator component that automatically monitors the backend status.
+
+#### Features:
+- **Automatic Polling**: Checks health status every 30 seconds
+- **Visual Indicators**: Color-coded status display
+  - 🟢 **Green (UP)**: System is healthy and operational
+  - 🔴 **Red (DOWN)**: System is down or unreachable
+  - ⚫ **Gray (UNKNOWN)**: Status not yet determined
+- **Real-time Updates**: Uses RxJS observables for reactive updates
+- **Multiple Display Locations**:
+  - Navigation bar (when logged in)
+  - Fixed footer (visible on all pages)
+
+#### Implementation:
+
+**Health Service** (`src/main/webapp/src/app/services/health.ts`):
+- Polls the `/actuator/health` endpoint
+- Broadcasts status changes using BehaviorSubject
+- Handles errors gracefully
+
+**Health Indicator Component** (`src/main/webapp/src/app/components/health-indicator/`):
+- Subscribes to health status updates
+- Displays color-coded status badge
+- Automatically updates without page refresh
+
+#### Development Server Configuration
+
+For the Angular development server (localhost:5000), the proxy configuration ensures health checks work correctly:
+
+**File**: `src/main/webapp/proxy-conf.json`
+```json
+{
+  "/api/v1": {
+    "target": "http://localhost:8080",
+    "secure": false
+  },
+  "/actuator": {
+    "target": "http://localhost:8080",
+    "secure": false
+  }
+}
+```
+
+This proxies actuator requests to the Spring Boot backend during development.
+
+### Testing Health Monitoring
+
+1. **Check backend health directly**:
+   ```bash
+   curl http://localhost:8080/actuator/health
+   ```
+
+2. **View in browser**:
+   - Production: http://localhost:6001 (health indicator in UI)
+   - Development: http://localhost:5000 (health indicator in UI)
+
+3. **Test failure scenarios**:
+   - Stop the Spring Boot backend
+   - Observe the health indicator turn red and display "DOWN"
+   - Restart the backend
+   - Watch the indicator automatically update to green "UP"
 
 ## 🐳 Docker Services
 
