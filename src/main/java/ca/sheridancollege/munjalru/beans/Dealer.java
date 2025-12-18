@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -22,5 +23,10 @@ public class Dealer {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "dealer_id")
-    private List<Car> cars;
+    @Builder.Default
+    private List<Car> cars = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dealer")
+    @Builder.Default
+    private List<User> users = new ArrayList<>();
 }
