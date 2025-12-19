@@ -1,8 +1,9 @@
 package ca.sheridancollege.munjalru.config;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,32 +16,46 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private static final String DEV_PROFILE = "dev";
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final Environment environment;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        boolean isDev = isDevProfileActive();
+
+        if (isDev) {
+            http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+        }
+
         return http
-                .cors(cors -> cors.configure(http))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // allow H2 console frames
-                .authorizeHttpRequests(authorize -> authorize
-                        // --- REQUIRED FOR ASSIGNMENT ---
-                        .requestMatchers("/actuator/health").permitAll()  // Allow Docker health check
-                        // -------------------------------
-                        .requestMatchers("/h2-console/**").permitAll()  // allow H2 console
-                        .requestMatchers("/api/v1/auth/**").permitAll()  // allow login/register endpoints
-                        .requestMatchers("/", "/index.html", "/login", "/register").permitAll()  // allow Angular app pages
-                        .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.html").permitAll()  // allow static resources
-                        .requestMatchers("/assets/**", "/static/**").permitAll()  // allow assets
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(authorize -> {
+                    authorize
+                            .requestMatchers("/actuator/health").permitAll()
+                            .requestMatchers("/api/v1/auth/**").permitAll()
+                            .requestMatchers("/", "/index.html", "/login", "/register").permitAll()
+                            .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.html").permitAll()
+                            .requestMatchers("/assets/**", "/static/**").permitAll()
+                            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
+
+                    if (isDev) {
+                        authorize.requestMatchers("/h2-console/**").permitAll();
+                    }
+
+                    authorize.anyRequest().authenticated();
+                })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -50,10 +65,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
+        configuration.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "https://final-project-480117.web.app",
-                // Added these for the assignment requirements
                 "http://localhost:5000",
                 "http://localhost:6000"
         ));
@@ -64,5 +77,9 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private boolean isDevProfileActive() {
+        return Arrays.asList(environment.getActiveProfiles()).contains(DEV_PROFILE);
     }
 }
