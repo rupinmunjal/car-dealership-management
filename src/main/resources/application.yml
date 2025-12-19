@@ -5,9 +5,19 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-    url: jdbc:postgresql://ajf:5432/carsdb
-    username: cars
-    password: dealer
+    # Local dev fallbacks. In production set SPRING_DATASOURCE_URL, USERNAME, PASSWORD.
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/carsdb}
+    username: ${SPRING_DATASOURCE_USERNAME:cars}
+    password: ${SPRING_DATASOURCE_PASSWORD:localdev}
+
+app:
+  jwt:
+    # In production, always set the JWT_SECRET environment variable.
+    # Generate with: openssl rand -base64 64
+    secret: ${JWT_SECRET:lLkWl475AXcZRZukLjUfcVX/BOPOqnkIxXY3LOHC9VmwDcH3lqno3uRbzegqhn8T4crRwlgMEVCkLr+b1B3hXQ==}
+    # Default: 24 hours (24 * 60 * 60 * 1000 = 86400000 ms).
+    # Override with JWT_EXPIRATION_MS environment variable.
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 management:
   endpoints:
