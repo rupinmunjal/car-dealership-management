@@ -5,8 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("test")
-class A2ApplicationTests {
+class A2ApplicationTests extends IntegrationTestBase {
 
     @Test
     void contextLoads() {
