@@ -52,30 +52,36 @@ A full-stack web application for managing car dealerships, built with Spring Boo
    cd car-dealership-management
    ```
 
-2. **Build and run with Docker Compose**
-   
+2. **(Optional) Copy the demo environment file**
+   ```bash
+   cp .env.example .env
+   ```
+   The included `.env.example` contains insecure demo defaults for local use only.
+
+3. **Build and run with Docker Compose**
+
    **For Staging Environment:**
    ```bash
-   docker-compose up staging -d
+   docker compose up --build -d database staging
    ```
    Access at: http://localhost:5000
 
    **For Production Environment:**
    ```bash
-   docker-compose up production -d
+   docker compose up --build -d database production
    ```
    Access at: http://localhost:6001
 
-3. **View logs**
+4. **View logs**
    ```bash
-   docker-compose logs -f staging
+   docker compose logs -f staging
    # or
-   docker-compose logs -f production
+   docker compose logs -f production
    ```
 
-4. **Stop services**
+5. **Stop services**
    ```bash
-   docker-compose down
+   docker compose down
    ```
 
 ### Option 2: Manual Setup
@@ -85,21 +91,28 @@ A full-stack web application for managing car dealerships, built with Spring Boo
 Create a PostgreSQL database:
 ```sql
 CREATE DATABASE carsdb;
-CREATE USER cars WITH PASSWORD 'dealer';
+CREATE USER cars WITH PASSWORD 'localdev';
 GRANT ALL PRIVILEGES ON DATABASE carsdb TO cars;
 ```
 
 #### 2. Backend Setup
 
-1. **Configure database connection**
-   
-   Edit `src/main/resources/application.yml`:
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:postgresql://localhost:5432/carsdb
-       username: cars
-       password: dealer
+1. **Set environment variables**
+
+   In your terminal:
+   ```bash
+   export JWT_SECRET=$(openssl rand -base64 64)
+   export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/carsdb
+   export SPRING_DATASOURCE_USERNAME=cars
+   export SPRING_DATASOURCE_PASSWORD=localdev
+   ```
+
+   Or copy the included demo values:
+   ```bash
+   cp .env.example .env
+   set -a
+   source .env
+   set +a
    ```
 
 2. **Build and run the backend**
@@ -107,7 +120,7 @@ GRANT ALL PRIVILEGES ON DATABASE carsdb TO cars;
    # Using Maven wrapper (recommended)
    ./mvnw clean install
    ./mvnw spring-boot:run
-   
+
    # Or using Maven
    mvn clean install
    mvn spring-boot:run
@@ -214,22 +227,26 @@ The application uses JWT (JSON Web Tokens) for authentication and authorization:
 ## 🌐 API Endpoints
 
 ### Authentication
-- `POST /api/auth/login` - User login (returns JWT token)
-- `POST /api/auth/register` - User registration
+- `POST /api/v1/auth/login` - User login (returns JWT token)
+- `POST /api/v1/auth/register` - User registration
 
 ### Cars
-- `GET /api/cars` - Get all cars
-- `GET /api/cars/{id}` - Get car by ID
-- `POST /api/cars` - Create new car
-- `PUT /api/cars/{id}` - Update car
-- `DELETE /api/cars/{id}` - Delete car
+- `GET /api/v1/cars` - Get paginated list of cars
+- `GET /api/v1/cars/{id}` - Get car by ID
+- `POST /api/v1/cars?dealerId={dealerId}` - Create new car for a dealer
+- `PUT /api/v1/cars/{id}` - Update car
+- `DELETE /api/v1/cars/{id}` - Delete car
 
 ### Dealers
-- `GET /api/dealers` - Get all dealers
-- `GET /api/dealers/{id}` - Get dealer by ID
-- `POST /api/dealers` - Create new dealer
-- `PUT /api/dealers/{id}` - Update dealer
-- `DELETE /api/dealers/{id}` - Delete dealer
+- `GET /api/v1/dealers` - Get paginated list of dealers
+- `GET /api/v1/dealers/{id}` - Get dealer by ID
+- `POST /api/v1/dealers` - Create new dealer
+- `PUT /api/v1/dealers/{id}` - Update dealer
+- `DELETE /api/v1/dealers/{id}` - Delete dealer
+
+### API Documentation
+- `GET /swagger-ui.html` - Swagger UI (OpenAPI/SpringDoc)
+- `GET /v3/api-docs` - Raw OpenAPI JSON
 
 ### Health Check
 - `GET /actuator/health` - Application health status
@@ -335,7 +352,7 @@ The Docker Compose setup includes:
 ### Services
 - **staging**: Staging environment (Port 5000)
 - **production**: Production environment (Port 6001)
-- **database**: PostgreSQL database (Port 5432)
+- **database**: PostgreSQL database (Port 5433 on the host, 5432 in the container)
 
 ### Networking
 All services communicate through the `app-network` bridge network.
@@ -345,14 +362,17 @@ All services communicate through the `app-network` bridge network.
 
 ## 📝 Environment Variables
 
-Key environment variables for Docker deployment:
+The demo values below are in `.env.example`. Copy them to `.env` and override as needed:
 
 ```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
+JWT_SECRET=lLkWl475AXcZRZukLjUfcVX/BOPOqnkIxXY3LOHC9VmwDcH3lqno3uRbzegqhn8T4crRwlgMEVCkLr+b1B3hXQ==
+JWT_EXPIRATION_MS=86400000
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/carsdb
 SPRING_DATASOURCE_USERNAME=cars
-SPRING_DATASOURCE_PASSWORD=dealer
-SPRING_JPA_HIBERNATE_DDL_AUTO=update
-MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health
+SPRING_DATASOURCE_PASSWORD=localdev
+POSTGRES_USER=cars
+POSTGRES_PASSWORD=localdev
+POSTGRES_DB=carsdb
 ```
 
 ## 🔧 Development
