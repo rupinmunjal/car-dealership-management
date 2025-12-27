@@ -50,10 +50,33 @@ public class User implements org.springframework.security.core.userdetails.UserD
     @Builder.Default
     private Set<Permission> permissions = new HashSet<>();
 
+    /**
+     * Whether this user account is active.
+     * Deactivated employees ({@code active = false}) are excluded from
+     * employee listings and cannot authenticate. Their existing JWTs
+     * remain valid until expiry (same tradeoff as dealer suspension).
+     */
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean active = true;
+
+    /**
+     * Cached dealer status extracted from the JWT at authentication time.
+     * Not persisted — set by {@code JwtAuthenticationFilter} on each request.
+     * Defaults to {@link DealerStatus#ACTIVE} so existing behaviour is
+     * unchanged when this field is not explicitly set.
+     */
+    @Transient
+    @Builder.Default
+    private DealerStatus dealerStatus = DealerStatus.ACTIVE;
+
     @Override
     public String getPassword() { return password; }
     @Override
     public String getUsername() { return email; }
+
+    @Override
+    public boolean isEnabled() { return active; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
