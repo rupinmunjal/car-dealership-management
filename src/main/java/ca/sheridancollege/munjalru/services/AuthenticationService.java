@@ -1,5 +1,6 @@
 package ca.sheridancollege.munjalru.services;
 
+import ca.sheridancollege.munjalru.beans.DealerStatus;
 import ca.sheridancollege.munjalru.beans.Role;
 import ca.sheridancollege.munjalru.beans.User;
 import ca.sheridancollege.munjalru.models.AuthenticationRequest;
@@ -24,13 +25,15 @@ public class AuthenticationService {
     /**
      * Registers a new user with the {@link Role#DEALER_EMPLOYEE} role.
      * No dealer is assigned during public registration — that is done
-     * later by a DEALER_ADMIN via a separate endpoint (Phase 2).
+     * later by a DEALER_ADMIN via a separate endpoint.
      */
     public AuthenticationResponse register(AuthenticationRequest request) {
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.DEALER_EMPLOYEE)
+                .active(true)
+                .dealerStatus(DealerStatus.ACTIVE)
                 .build();
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
@@ -44,13 +47,19 @@ public class AuthenticationService {
 
     /**
      * Authenticates an existing user and returns a JWT with embedded
-     * role, dealerId, and permissions claims.
+     * role, dealerId, dealerStatus, and permissions claims.
      */
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+
+        // Populate the transient dealerStatus from the DB so JwtService embeds it
+        if (user.getDealer() != null) {
+            user.setDealerStatus(user.getDealer().getStatus());
+        }
+
         var jwtToken = jwtService.generateToken(user);
 
         AuthenticationResponse.AuthenticationResponseBuilder builder =

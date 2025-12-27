@@ -1,5 +1,6 @@
 package ca.sheridancollege.munjalru.services;
 
+import ca.sheridancollege.munjalru.beans.DealerStatus;
 import ca.sheridancollege.munjalru.beans.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -27,19 +28,13 @@ public class JwtService {
         this.expirationMs = expirationMs;
     }
 
-    // ── username ─────────────────────────────────────────────────
-
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // ── role ────────────────────────────────────────────────────
-
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
-
-    // ── dealerId ────────────────────────────────────────────────
 
     public Long extractDealerId(String token) {
         Object raw = extractAllClaims(token).get("dealerId");
@@ -48,7 +43,15 @@ public class JwtService {
         return null;
     }
 
-    // ── permissions ─────────────────────────────────────────────
+    public DealerStatus extractDealerStatus(String token) {
+        String raw = extractClaim(token, claims -> claims.get("dealerStatus", String.class));
+        if (raw == null) return DealerStatus.ACTIVE;
+        try {
+            return DealerStatus.valueOf(raw);
+        } catch (IllegalArgumentException e) {
+            return DealerStatus.ACTIVE;
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public List<String> extractPermissions(String token) {
@@ -56,30 +59,24 @@ public class JwtService {
                 (List<String>) claims.getOrDefault("permissions", Collections.emptyList()));
     }
 
-    // ── generic claim extraction ────────────────────────────────
-
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // ── token generation (generic UserDetails) ──────────────────
-
     public String generateToken(UserDetails userDetails) {
         if (userDetails instanceof User user) {
             return generateToken(user);
         }
-        // Fallback for non-User UserDetails (should not happen in this app)
         return generateToken(new HashMap<>(), userDetails);
     }
-
-    // ── token generation (User with role + dealerId + permissions)
 
     public String generateToken(User user) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", user.getRole().name());
         if (user.getDealer() != null) {
             extraClaims.put("dealerId", user.getDealer().getId());
+            extraClaims.put("dealerStatus", user.getDealerStatus().name());
         }
         if (user.getRole() == ca.sheridancollege.munjalru.beans.Role.DEALER_EMPLOYEE
                 && user.getPermissions() != null) {
@@ -91,8 +88,6 @@ public class JwtService {
         return generateToken(extraClaims, user);
     }
 
-    // ── raw token generation ────────────────────────────────────
-
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .claims(extraClaims)
@@ -102,8 +97,6 @@ public class JwtService {
                 .signWith(getSignInKey())
                 .compact();
     }
-
-    // ── validation ──────────────────────────────────────────────
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
@@ -117,8 +110,6 @@ public class JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
-    // ── parsing ─────────────────────────────────────────────────
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
