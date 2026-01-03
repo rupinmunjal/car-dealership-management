@@ -1,6 +1,7 @@
 package ca.sheridancollege.munjalru.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -24,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String DEV_PROFILE = "dev";
+    private static final String LOCAL_PROFILE = "local";
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -32,9 +33,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        boolean isDev = isDevProfileActive();
+        boolean isLocal = isLocalProfileActive();
 
-        if (isDev) {
+        if (isLocal) {
             http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
         }
 
@@ -50,7 +51,7 @@ public class SecurityConfig {
                             .requestMatchers("/assets/**", "/static/**").permitAll()
                             .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
 
-                    if (isDev) {
+                    if (isLocal) {
                         authorize.requestMatchers("/h2-console/**").permitAll();
                     }
 
@@ -62,14 +63,13 @@ public class SecurityConfig {
                 .build();
     }
 
+    @Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:5000,http://localhost:6001}")
+    private List<String> allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "http://localhost:5000",
-                "http://localhost:6000"
-        ));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -79,7 +79,7 @@ public class SecurityConfig {
         return source;
     }
 
-    private boolean isDevProfileActive() {
-        return Arrays.asList(environment.getActiveProfiles()).contains(DEV_PROFILE);
+    private boolean isLocalProfileActive() {
+        return Arrays.asList(environment.getActiveProfiles()).contains(LOCAL_PROFILE);
     }
 }
