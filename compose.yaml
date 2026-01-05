@@ -20,6 +20,7 @@ services:
     environment:
       # Spring Boot Configuration (must match the database service credentials below)
       # Use the Docker service name 'database' and the internal container port 5432.
+      - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-cars}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-localdev}
@@ -60,6 +61,7 @@ services:
     environment:
       # Spring Boot Configuration
       # Use the Docker service name 'database' and the internal container port 5432.
+      - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-cars}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-localdev}
