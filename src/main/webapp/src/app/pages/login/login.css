@@ -1,0 +1,37 @@
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.submit-btn {
+  height: 48px;
+  margin-top: 8px;
+}
+
+.spinner-inline {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.muted {
+  color: #9ca3af;
+  font-size: 14px;
+}
