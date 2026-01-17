@@ -1,152 +1,109 @@
-<div class="min-h-screen bg-gray-50">
-<!-- Header -->
-<div class="bg-white shadow-sm border-b">
-  <div class="max-w-7xl mx-auto px-4 py-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">🚗 Cars Inventory</h1>
-        <p class="text-gray-600 mt-1">Manage and view all cars in the dealership</p>
-      </div>
-      <div class="flex space-x-3">
-        <a *ngIf="isAdmin" routerLink="/cars/add" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-          + Add Car
-        </a>
-        <a routerLink="/" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200">
-          ← Back to Home
-        </a>
-      </div>
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">🚗 Cars Inventory</h2>
+      <p class="page-subtitle">Manage and view all cars in the dealership</p>
+    </div>
+    <div class="page-actions">
+      <a mat-flat-button *ngIf="isAdmin" color="primary" routerLink="/cars/add">
+        <mat-icon>add</mat-icon> Add Car
+      </a>
+      <a mat-stroked-button routerLink="/">
+        <mat-icon>arrow_back</mat-icon> Home
+      </a>
     </div>
   </div>
-</div>
 
-<!-- Main Content -->
-<div class="max-w-7xl mx-auto px-4 py-8">
   <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="flex items-center">
-        <div class="p-2 bg-blue-100 rounded-lg">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-          </svg>
+  <div class="stats-row">
+    <mat-card appearance="outlined">
+      <mat-card-content class="stat-card">
+        <mat-icon class="stat-icon blue">directions_car</mat-icon>
+        <div>
+          <span class="stat-value">{{ cars.length }}</span>
+          <span class="stat-label">Total Cars</span>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-600">Total Cars</p>
-          <p class="text-2xl font-bold text-gray-900">{{ cars.length }}</p>
-        </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
 
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="flex items-center">
-        <div class="p-2 bg-green-100 rounded-lg">
-          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+    <mat-card appearance="outlined">
+      <mat-card-content class="stat-card">
+        <mat-icon class="stat-icon green">check_circle</mat-icon>
+        <div>
+          <span class="stat-value">{{ cars.length }}</span>
+          <span class="stat-label">Available</span>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-600">Available</p>
-          <p class="text-2xl font-bold text-gray-900">{{ cars.length }}</p>
-        </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
 
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="flex items-center">
-        <div class="p-2 bg-purple-100 rounded-lg">
-          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-          </svg>
+    <mat-card appearance="outlined">
+      <mat-card-content class="stat-card">
+        <mat-icon class="stat-icon purple">local_offer</mat-icon>
+        <div>
+          <span class="stat-value">{{ uniqueBrandsCount }}</span>
+          <span class="stat-label">Brands</span>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-600">Brands</p>
-          <p class="text-2xl font-bold text-gray-900">{{ uniqueBrandsCount }}</p>
-        </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <!-- Cars Table -->
-  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900">Cars List</h2>
-    </div>
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Cars List</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="table-container">
+      <table mat-table [dataSource]="cars" class="full-width-table">
 
-    <!-- Table Container with horizontal scroll for mobile -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            ID
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Make
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Model
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Model Year
-          </th>
-          <th *ngIf="isAdmin" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Actions
-          </th>
-        </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let car">{{ car.id }}</td>
+        </ng-container>
 
-        <!-- Angular loop for cars -->
-        <tr *ngFor="let car of cars" class="hover:bg-gray-50 transition-colors duration-150">
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ car.id }}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <div class="h-10 w-10 flex-shrink-0">
-                <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center">
-                  <span class="text-white font-medium text-sm">{{ car.make ? car.make[0].toUpperCase() : 'C' }}</span>
-                </div>
-              </div>
-              <div class="ml-4">
-                <div class="text-sm font-medium text-gray-900">{{ car.make }}</div>
-              </div>
+        <ng-container matColumnDef="make">
+          <th mat-header-cell *matHeaderCellDef>Make</th>
+          <td mat-cell *matCellDef="let car">
+            <div class="cell-with-avatar">
+              <div class="avatar blue-bg">{{ car.make ? car.make[0].toUpperCase() : '?' }}</div>
+              {{ car.make }}
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ car.model }}
+        </ng-container>
+
+        <ng-container matColumnDef="model">
+          <th mat-header-cell *matHeaderCellDef>Model</th>
+          <td mat-cell *matCellDef="let car">{{ car.model }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="modelYear">
+          <th mat-header-cell *matHeaderCellDef>Year</th>
+          <td mat-cell *matCellDef="let car">
+            <mat-chip>{{ car.modelYear }}</mat-chip>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-              {{ car.modelYear }}
-            </span>
-          </td>
-          <td *ngIf="isAdmin" class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-            <button (click)="deleteCar(car.id)"
-                    class="text-red-600 hover:text-red-900 transition-colors duration-150 bg-transparent border-none cursor-pointer">
-              Delete
+        </ng-container>
+
+        <ng-container matColumnDef="actions" *ngIf="isAdmin">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let car">
+            <button mat-icon-button color="warn" (click)="deleteCar(car.id)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
             </button>
           </td>
-        </tr>
+        </ng-container>
 
-        <!-- Empty state when no cars -->
-        <tr *ngIf="cars.length === 0">
-          <td [attr.colspan]="isAdmin ? 5 : 4" class="px-6 py-12 text-center">
-            <div class="flex flex-col items-center">
-              <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No cars found</h3>
-              <p class="text-gray-500 mb-4">Get started by adding your first car to the inventory.</p>
-              <a *ngIf="isAdmin" routerLink="/cars/add" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                + Add First Car
-              </a>
-            </div>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- Empty state -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+            <mat-icon class="empty-icon">inventory_2</mat-icon>
+            <h3>No cars found</h3>
+            <p>Get started by adding your first car.</p>
+            <a mat-flat-button color="primary" *ngIf="isAdmin" routerLink="/cars/add">Add First Car</a>
           </td>
         </tr>
-        </tbody>
       </table>
-    </div>
-  </div>
-</div>
+    </mat-card-content>
+  </mat-card>
 </div>
