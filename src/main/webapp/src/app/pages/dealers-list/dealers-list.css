@@ -1,0 +1,27 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.page-title { font-size: 28px; font-weight: 500; margin: 0 0 4px; }
+.page-subtitle { color: #666; margin: 0; font-size: 16px; }
+.page-actions { display: flex; gap: 8px; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { display: flex; align-items: center; gap: 16px; padding: 16px !important; }
+.stat-icon { font-size: 36px; width: 36px; height: 36px; border-radius: 8px; padding: 8px; }
+.stat-icon.blue { background: #e3f2fd; color: #1565c0; }
+.stat-icon.green { background: #e8f5e9; color: #2e7d32; }
+.stat-icon.purple { background: #f3e5f5; color: #7b1fa2; }
+.stat-value { display: block; font-size: 24px; font-weight: 600; }
+.stat-label { display: block; font-size: 13px; color: #888; }
+.full-width-table { width: 100%; }
+.table-container { padding: 0 !important; }
+.cell-with-avatar { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; }
+.avatar.purple-bg { background: linear-gradient(135deg, #ab47bc, #7b1fa2); }
+.loc-icon { font-size: 16px; width: 16px; height: 16px; color: #999; margin-right: 4px; vertical-align: middle; }
+.empty-state { text-align: center; padding: 48px 16px !important; }
+.empty-icon { font-size: 48px; width: 48px; height: 48px; color: #ccc; margin-bottom: 8px; }
