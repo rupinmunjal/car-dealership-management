@@ -1,23 +1,25 @@
 import { Component } from '@angular/core';
 import { DealerService } from '../../services/dealer';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-dealer-add',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterLink,
+    MatCardModule, MatFormFieldModule, MatInputModule,
+    MatButtonModule, MatIconModule],
   templateUrl: './dealer-add.html',
   styleUrl: './dealer-add.css',
 })
 export class DealerAdd {
 
-  dealer = {
-    name: '',
-    location: ''
-  };
-
+  dealer = { name: '', location: '' };
   message: string = '';
   error: string = '';
 
@@ -32,26 +34,18 @@ export class DealerAdd {
       next: () => {
         this.message = 'Dealer added successfully!';
         this.error = '';
-        // Clear only the form data, not the messages
         this.clearForm();
-        // Redirect after 1 second
-        setTimeout(() => {
-          this.router.navigate(['/dealers']);
-        }, 1000);
+        setTimeout(() => this.router.navigate(['/dealers']), 1000);
       },
-      error: (err) => {
+      error: () => {
         this.error = 'Failed to add dealer. Please try again.';
         this.message = '';
-        console.error(err);
       }
     });
   }
 
   clearForm() {
-    this.dealer = {
-      name: '',
-      location: ''
-    };
+    this.dealer = { name: '', location: '' };
   }
 
   resetForm() {
