@@ -1,5 +1,4 @@
-<div class="health-indicator" [style.background-color]="getStatusColor()">
-  <span class="health-icon">{{ getStatusIcon() }}</span>
-  <span class="health-text">{{ healthStatus }}</span>
-</div>
-
+<mat-chip [color]="getStatusColor()" highlighted>
+  <mat-icon matChipAvatar>{{ getStatusIcon() }}</mat-icon>
+  {{ healthStatus }}
+</mat-chip>
