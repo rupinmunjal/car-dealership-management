@@ -2,10 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Health } from '../../services/health';
 import { Subscription } from 'rxjs';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-health-indicator',
-  imports: [CommonModule],
+  imports: [CommonModule, MatChipsModule, MatIconModule],
   templateUrl: './health-indicator.html',
   styleUrl: './health-indicator.css',
 })
@@ -17,37 +19,27 @@ export class HealthIndicator implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.healthService.healthStatus$.subscribe(
-      status => {
-        this.healthStatus = status;
-      }
+      status => { this.healthStatus = status; }
     );
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    if (this.subscription) { this.subscription.unsubscribe(); }
   }
 
-  getStatusColor(): string {
+  getStatusColor(): 'primary' | 'warn' | undefined {
     switch (this.healthStatus) {
-      case 'UP':
-        return 'green';
-      case 'DOWN':
-        return 'red';
-      default:
-        return 'gray';
+      case 'UP': return 'primary';
+      case 'DOWN': return 'warn';
+      default: return undefined;
     }
   }
 
   getStatusIcon(): string {
     switch (this.healthStatus) {
-      case 'UP':
-        return '✓';
-      case 'DOWN':
-        return '✗';
-      default:
-        return '?';
+      case 'UP': return 'check_circle';
+      case 'DOWN': return 'cancel';
+      default: return 'help';
     }
   }
 }
