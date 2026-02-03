@@ -1,0 +1,6 @@
+.card-icon-wrapper { width: 48px; height: 48px; border-radius: 12px; background: #fce4ec; color: #c62828; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.card-icon-wrapper mat-icon { font-size: 24px; width: 24px; height: 24px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.dashboard-card { cursor: pointer; transition: transform .2s,box-shadow .2s; }
+.dashboard-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+mat-card-content p { color: #666; margin: 8px 0 0; }

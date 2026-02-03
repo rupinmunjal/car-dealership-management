@@ -1,0 +1,21 @@
+<mat-toolbar color="warn">
+  <span>👤 EMPLOYEE Dashboard — {{email}}</span>
+  <span class="spacer"></span>
+  <app-health-indicator></app-health-indicator>
+  <button mat-button (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
+</mat-toolbar>
+<div class="page-container">
+  <h2>My Permissions</h2>
+  <mat-chip-listbox>
+    <mat-chip *ngFor="let p of permissions" color="primary" highlighted>{{ p }}</mat-chip>
+    <mat-chip *ngIf="permissions.length === 0" color="warn">No specific permissions — view only</mat-chip>
+  </mat-chip-listbox>
+  <div class="dashboard-grid" style="margin-top:24px">
+    <mat-card class="dashboard-card" routerLink="/cars" appearance="outlined">
+      <mat-card-content><div class="card-icon-wrapper"><mat-icon>directions_car</mat-icon></div><mat-card-title>View Cars</mat-card-title><p>Browse dealership inventory</p></mat-card-content>
+    </mat-card>
+    <mat-card *ngIf="canAddCar" class="dashboard-card" routerLink="/cars/add" appearance="outlined">
+      <mat-card-content><div class="card-icon-wrapper"><mat-icon>add</mat-icon></div><mat-card-title>Add Car</mat-card-title><p>Add new vehicles to inventory</p></mat-card-content>
+    </mat-card>
+  </div>
+</div>
