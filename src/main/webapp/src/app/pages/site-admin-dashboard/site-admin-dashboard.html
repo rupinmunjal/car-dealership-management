@@ -1,0 +1,57 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="sidenav.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>🔧 SITE ADMIN Dashboard</span>
+  <span class="spacer"></span>
+  <app-health-indicator></app-health-indicator>
+  <button mat-button (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav mode="side" opened class="sidenav">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/dealers" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>business</mat-icon> Dealers
+      </a>
+      <a mat-list-item routerLink="/dealers/register" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>add_business</mat-icon> Register Dealer
+      </a>
+      <a mat-list-item routerLink="/packages" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>inventory_2</mat-icon> Packages
+      </a>
+      <a mat-list-item routerLink="/cars" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>directions_car</mat-icon> All Cars
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="sidenav-content">
+    <div class="page-container">
+      <h2>Platform Overview</h2>
+      <div class="dashboard-grid">
+        <mat-card class="dashboard-card" routerLink="/dealers" appearance="outlined">
+          <mat-card-content>
+            <div class="card-icon-wrapper"><mat-icon>business</mat-icon></div>
+            <mat-card-title>Manage Dealers</mat-card-title>
+            <p>View, edit, suspend, or delete dealerships</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="dashboard-card" routerLink="/dealers/register" appearance="outlined">
+          <mat-card-content>
+            <div class="card-icon-wrapper"><mat-icon>add_business</mat-icon></div>
+            <mat-card-title>Register Dealer</mat-card-title>
+            <p>Create a new dealer with its admin account</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="dashboard-card" routerLink="/packages" appearance="outlined">
+          <mat-card-content>
+            <div class="card-icon-wrapper"><mat-icon>inventory_2</mat-icon></div>
+            <mat-card-title>Subscription Packages</mat-card-title>
+            <p>Manage seat and listing limits per package</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
