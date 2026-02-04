@@ -1,0 +1,17 @@
+<mat-toolbar color="primary"><span>➕ Register New Dealer</span></mat-toolbar>
+<div class="page-container form-page-container">
+  <mat-card appearance="outlined">
+    <mat-card-header><mat-card-title>Create Dealer & Admin Account</mat-card-title><mat-card-subtitle>SITE_ADMIN only</mat-card-subtitle></mat-card-header>
+    <mat-card-content>
+      <div *ngIf="message" class="alert alert-success"><mat-icon>check_circle</mat-icon>{{ message }}</div>
+      <div *ngIf="error" class="alert alert-error"><mat-icon>error</mat-icon>{{ error }}</div>
+      <form (ngSubmit)="onSubmit()" class="form-layout">
+        <mat-form-field appearance="outline"><mat-label>Dealer Name</mat-label><input matInput [(ngModel)]="form.name" name="name" required></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Location</mat-label><input matInput [(ngModel)]="form.location" name="location" required></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Admin Email</mat-label><input matInput type="email" [(ngModel)]="form.adminEmail" name="adminEmail" required></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Admin Password</mat-label><input matInput type="password" [(ngModel)]="form.adminPassword" name="adminPassword" required></mat-form-field>
+        <button mat-flat-button color="primary" type="submit"><mat-icon>add</mat-icon> Register Dealer</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
