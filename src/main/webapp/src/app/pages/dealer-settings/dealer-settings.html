@@ -1,0 +1,16 @@
+<mat-toolbar color="accent"><span>⚙️ Dealer Settings</span></mat-toolbar>
+<div class="page-container form-page-container">
+  <mat-card appearance="outlined">
+    <mat-card-header><mat-card-title>Update Settings</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div *ngIf="message" class="alert alert-success"><mat-icon>check_circle</mat-icon>{{ message }}</div>
+      <div *ngIf="error" class="alert alert-error"><mat-icon>error</mat-icon>{{ error }}</div>
+      <form (ngSubmit)="onSubmit()" class="form-layout">
+        <mat-form-field appearance="outline"><mat-label>Display Name</mat-label><input matInput [(ngModel)]="form.displayName" name="displayName"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Description</mat-label><textarea matInput [(ngModel)]="form.description" name="description" rows="3"></textarea></mat-form-field>
+        <mat-slide-toggle [(ngModel)]="form.visible" name="visible">Visible to public</mat-slide-toggle>
+        <button mat-flat-button color="primary" type="submit"><mat-icon>save</mat-icon> Save Settings</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
