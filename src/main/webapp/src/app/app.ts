@@ -23,7 +23,7 @@ export class AppComponent {
   }
 
   currentUserEmail(): string | null {
-    return this.authService.getCurrentEmail();
+    return this.authService.getEmail();
   }
 
   logout(): void {
