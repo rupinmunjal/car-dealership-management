@@ -23,8 +23,8 @@ spring:
 # ── JWT ───────────────────────────────────────────────────────────
 app:
   jwt:
-    # Override via JWT_SECRET env var (required in production).
-    secret: ${JWT_SECRET:dev-only-not-for-production-use}
+    # Required — must be set via JWT_SECRET env var (see .env or .env.example).
+    secret: ${JWT_SECRET}
     # Override via JWT_EXPIRATION_MS env var.
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
