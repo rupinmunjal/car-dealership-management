@@ -8,9 +8,9 @@ on:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Java Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,13 +23,37 @@ jobs:
           cache: 'maven'
 
       - name: Test
-        run: mvn test
+        run: ./mvnw test
+
+  angular-build:
+    name: Build Angular Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/main/webapp
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: src/main/webapp/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Angular build
+        run: npm run build -- --configuration production
 
   staging-docker:
     name: Staging Docker Build & Verify
     runs-on: ubuntu-latest
-    needs: test
-    
+    needs: [test, angular-build]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -48,7 +72,7 @@ jobs:
         run: |
           echo "Checking staging health endpoint..."
           curl -f http://localhost:5000/actuator/health || exit 1
-          
+
           echo "Checking staging responds..."
           curl -s http://localhost:5000/
           echo "✅ Staging deployment verified!"
@@ -56,14 +80,12 @@ jobs:
       - name: Run smoke tests
         run: |
           echo "Running post-deployment smoke tests..."
-          # 1. Verify Health (JSON response)
           STATUS=$(curl -s http://localhost:5000/actuator/health | grep "UP")
           if [ -z "$STATUS" ]; then echo "❌ Health check failed"; exit 1; fi
-          
-          # 2. Verify Index Page loads
+
           HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost:5000/index.html)
           if [ "$HTTP_CODE" != "200" ]; then echo "❌ Index page failed (Code: $HTTP_CODE)"; exit 1; fi
-          
+
           echo "✅ All Staging smoke tests passed!"
 
       - name: Cleanup
@@ -73,8 +95,8 @@ jobs:
   staging-summary:
     name: Staging Summary
     runs-on: ubuntu-latest
-    needs: [test, staging-docker]
-    
+    needs: [test, angular-build, staging-docker]
+
     steps:
       - name: Deployment Summary
         run: |
