@@ -2,6 +2,7 @@ package ca.sheridancollege.munjalru.services;
 
 import ca.sheridancollege.munjalru.beans.Car;
 import ca.sheridancollege.munjalru.beans.Dealer;
+import ca.sheridancollege.munjalru.beans.Package;
 import ca.sheridancollege.munjalru.dto.CarRequest;
 import ca.sheridancollege.munjalru.dto.CarResponse;
 import ca.sheridancollege.munjalru.mapper.CarDealerMapper;
@@ -72,6 +73,19 @@ public class CarService {
     public CarResponse createForDealer(Long dealerId, CarRequest request) {
         Dealer dealer = dealerRepository.findById(dealerId)
                 .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + dealerId));
+
+        // Enforce car listing limit if dealer has a package assigned
+        Package pkg = dealer.getDealerPackage();
+        if (pkg != null && dealer.getCars() != null) {
+            long currentCount = dealer.getCars().size();
+            if (currentCount >= pkg.getMaxCarListings()) {
+                throw new IllegalStateException(String.format(
+                        "Car listing limit (%d) reached for package '%s'. " +
+                        "Currently have %d cars. Remove some cars or upgrade your package " +
+                        "before adding more.",
+                        pkg.getMaxCarListings(), pkg.getName(), currentCount));
+            }
+        }
 
         if (dealer.getCars() == null) {
             dealer.setCars(new ArrayList<>());
