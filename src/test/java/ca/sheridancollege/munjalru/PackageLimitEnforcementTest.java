@@ -3,6 +3,7 @@ package ca.sheridancollege.munjalru;
 import ca.sheridancollege.munjalru.beans.*;
 import ca.sheridancollege.munjalru.beans.Package;
 import ca.sheridancollege.munjalru.dto.CarRequest;
+import ca.sheridancollege.munjalru.dto.CreateEmployeeRequest;
 import ca.sheridancollege.munjalru.repositories.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,12 +15,15 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Set;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Tests for package-driven limits: car listing caps and employee seat caps.
+ * Tests for package-driven limits: car listing caps, employee seat caps,
+ * and package downgrade behaviour.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,9 +66,10 @@ public class PackageLimitEnforcementTest extends IntegrationTestBase {
         return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
     }
 
+    // ── Car listing limit enforcement ──────────────────────────────
+
     @Test
     void dealerAdminCannotExceedCarListingLimit() throws Exception {
-        // Add 2 cars (reaching the limit)
         for (int i = 1; i <= 2; i++) {
             CarRequest car = CarRequest.builder()
                     .make("Brand" + i).model("Model" + i).modelYear(2024).build();
@@ -76,7 +81,6 @@ public class PackageLimitEnforcementTest extends IntegrationTestBase {
                     .andExpect(status().isCreated());
         }
 
-        // 3rd car should be rejected (limit = 2)
         CarRequest car = CarRequest.builder()
                 .make("Brand3").model("Model3").modelYear(2024).build();
         mockMvc.perform(post("/api/v1/cars")
@@ -89,11 +93,9 @@ public class PackageLimitEnforcementTest extends IntegrationTestBase {
 
     @Test
     void dealerWithoutPackageHasNoCarLimit() throws Exception {
-        // Remove package from dealer
         dealerA.setDealerPackage(null);
         dealerRepository.save(dealerA);
 
-        // Add 5 cars — all should succeed (no limit)
         for (int i = 1; i <= 5; i++) {
             CarRequest car = CarRequest.builder()
                     .make("Brand" + i).model("Model" + i).modelYear(2024).build();
@@ -104,5 +106,52 @@ public class PackageLimitEnforcementTest extends IntegrationTestBase {
                             .with(authentication(dealerAdminAuth())))
                     .andExpect(status().isCreated());
         }
+    }
+
+    // ── Package downgrade behaviour ────────────────────────────────
+
+    @Test
+    void packageDowngradeDoesNotDeactivateExistingEmployees() throws Exception {
+        CreateEmployeeRequest emp = CreateEmployeeRequest.builder()
+                .email("emp1@test.com").password("pw").permissions(Set.of()).build();
+        mockMvc.perform(post("/api/v1/dealers/" + dealerA.getId() + "/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emp))
+                        .with(authentication(dealerAdminAuth())))
+                .andExpect(status().isCreated());
+
+        Package zeroPkg = packageRepository.save(Package.builder()
+                .name("Zero").maxEmployeeSeats(0).maxCarListings(5).build());
+        dealerA.setDealerPackage(zeroPkg);
+        dealerRepository.save(dealerA);
+
+        mockMvc.perform(get("/api/v1/dealers/" + dealerA.getId() + "/employees")
+                        .with(authentication(dealerAdminAuth())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void packageDowngradeBlocksNewHires() throws Exception {
+        CreateEmployeeRequest emp = CreateEmployeeRequest.builder()
+                .email("emp1@test.com").password("pw").permissions(Set.of()).build();
+        mockMvc.perform(post("/api/v1/dealers/" + dealerA.getId() + "/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emp))
+                        .with(authentication(dealerAdminAuth())))
+                .andExpect(status().isCreated());
+
+        Package zeroPkg = packageRepository.save(Package.builder()
+                .name("Zero").maxEmployeeSeats(0).maxCarListings(5).build());
+        dealerA.setDealerPackage(zeroPkg);
+        dealerRepository.save(dealerA);
+
+        CreateEmployeeRequest emp2 = CreateEmployeeRequest.builder()
+                .email("emp2@test.com").password("pw").permissions(Set.of()).build();
+        mockMvc.perform(post("/api/v1/dealers/" + dealerA.getId() + "/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emp2))
+                        .with(authentication(dealerAdminAuth())))
+                .andExpect(status().isConflict());
     }
 }
