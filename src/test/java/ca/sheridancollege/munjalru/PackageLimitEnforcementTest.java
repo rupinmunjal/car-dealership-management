@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests for package-driven limits: car listing caps, employee seat caps,
- * and package downgrade behaviour.
+ * package downgrade behaviour, and deactivated-employee flows.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -153,5 +153,29 @@ public class PackageLimitEnforcementTest extends IntegrationTestBase {
                         .content(objectMapper.writeValueAsString(emp2))
                         .with(authentication(dealerAdminAuth())))
                 .andExpect(status().isConflict());
+    }
+
+    // ── Deactivated employee flows ─────────────────────────────────
+
+    @Test
+    void deactivatedEmployeeNotInListing() throws Exception {
+        CreateEmployeeRequest emp = CreateEmployeeRequest.builder()
+                .email("emp@test.com").password("pw").permissions(Set.of()).build();
+        String json = mockMvc.perform(post("/api/v1/dealers/" + dealerA.getId() + "/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emp))
+                        .with(authentication(dealerAdminAuth())))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Long empId = objectMapper.readTree(json).get("id").asLong();
+
+        mockMvc.perform(delete("/api/v1/dealers/" + dealerA.getId() + "/employees/" + empId)
+                        .with(authentication(dealerAdminAuth())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/dealers/" + dealerA.getId() + "/employees")
+                        .with(authentication(dealerAdminAuth())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 }
