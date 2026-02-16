@@ -26,7 +26,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-localdev}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET:-lLkWl475AXcZRZukLjUfcVX/BOPOqnkIxXY3LOHC9VmwDcH3lqno3uRbzegqhn8T4crRwlgMEVCkLr+b1B3hXQ==}
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-86400000}
       # SITE_ADMIN Bootstrap (first-run account creation)
       - SITE_ADMIN_EMAIL=${SITE_ADMIN_EMAIL}
@@ -70,7 +70,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-localdev}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update  # For Docker environment, auto-create schema
       # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET:-lLkWl475AXcZRZukLjUfcVX/BOPOqnkIxXY3LOHC9VmwDcH3lqno3uRbzegqhn8T4crRwlgMEVCkLr+b1B3hXQ==}
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-86400000}
       # SITE_ADMIN Bootstrap (first-run account creation)
       - SITE_ADMIN_EMAIL=${SITE_ADMIN_EMAIL}
