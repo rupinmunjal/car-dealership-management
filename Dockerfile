@@ -38,6 +38,14 @@ USER appuser
 # Exposed port (Internal Container Port)
 EXPOSE 8080
 
+# ── Runtime environment variables (passed by docker compose or at runtime) ──
+# Required for first-run SITE_ADMIN bootstrap (see DataInitializer):
+#   SITE_ADMIN_EMAIL   – email for the initial platform admin account
+#   SITE_ADMIN_PASSWORD – password for the initial platform admin account
+#   JWT_SECRET          – Base64-encoded secret for signing JWTs
+# Optional:
+#   JWT_EXPIRATION_MS   – token lifetime in ms (default 86400000 = 24 h)
+
 # Health check
 # Uses the Actuator endpoint we enabled in SecurityConfig
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
