@@ -1,405 +1,252 @@
 # Car Dealership Management System
 
-A full-stack web application for managing car dealerships, built with Spring Boot (backend) and Angular (frontend). The application provides comprehensive features for managing car inventory, dealer information, and user authentication.
+A full-stack web application for managing car dealerships with role-based access
+control, built with **Spring Boot 3.5** (Java 21) and **Angular 21** (Angular Material).
+Designed as a portfolio/showcase project demonstrating JWT authentication,
+authorization scoping, package-based limits, and a polished UI.
 
-## 🚀 Features
+---
 
-- **Car Management**: Add, view, update, and delete car inventory
-- **Dealer Management**: Manage dealer information and profiles
-- **User Authentication**: JWT-based authentication and authorization
-- **RESTful API**: Well-structured REST endpoints for all operations
-- **Responsive UI**: Modern Angular frontend with responsive design
-- **Database**: PostgreSQL for reliable data persistence
-- **Docker Support**: Containerized deployment for staging and production environments
-- **Real-time Health Monitoring**: Spring Boot Actuator with frontend health indicator displaying system status
+## 👥 Role Model
+
+| Role | Description | Dashboard |
+|---|---|---|
+| **SITE_ADMIN** | Platform super-admin. Manages all dealers, packages, and can perform any action. | Dealer list, package CRUD, create dealer |
+| **DEALER_ADMIN** | Owns one dealership. Manages cars, employees, and dealer settings. | Their dealership's cars, employee management, settings |
+| **DEALER_EMPLOYEE** | Works at one dealership. Access scoped by granted permissions (`CAN_ADD_CAR`, `CAN_EDIT_CAR`, `CAN_DELETE_CAR`). | Permission-scoped: UI hides actions the employee can't perform |
+
+**Login flow:** User logs in once → JWT carries their role → Angular route guard
+redirects them to the correct dashboard automatically. No manual role selection.
+
+---
+
+## 📦 Package & Permission System
+
+- **SITE_ADMIN** creates subscription **Packages** (e.g. "Starter" with 5 seats, 20 car listings).
+- **SITE_ADMIN** assigns a package to each **Dealer** during registration.
+- The package enforces:
+  - **Max employee seats** — blocks new hires when limit reached (409 Conflict).
+  - **Max car listings** — blocks new cars when limit reached (409 Conflict).
+- **Package downgrade:** Existing employees are **not** retroactively deactivated.
+  Only new hires are blocked. (See `docs/DESIGN_DECISIONS.md` for rationale.)
+- **DEALER_EMPLOYEE** permissions (`CAN_ADD_CAR`, `CAN_EDIT_CAR`, `CAN_DELETE_CAR`)
+  are managed by DEALER_ADMIN through the employee management UI.
+
+---
 
 ## 🛠️ Technology Stack
 
 ### Backend
-- **Java 21**
-- **Spring Boot 3.5.7**
-- **Spring Security** (JWT authentication)
-- **Spring Data JPA**
-- **PostgreSQL**
-- **Lombok**
-- **Maven**
+- **Java 21** with **Spring Boot 3.5.7**
+- **Spring Security** — JWT authentication (jjwt 0.12.6)
+- **Spring Data JPA** — Hibernate ORM
+- **H2** (local dev) / **PostgreSQL** (production)
+- **Lombok** — boilerplate reduction
+- **SpringDoc OpenAPI** (2.8.9) — Swagger UI at `/swagger-ui.html`
+- **Maven** — build & dependency management
 
 ### Frontend
-- **Angular 21**
-- **TypeScript**
-- **RxJS**
-- **Angular Router**
+- **Angular 21** with TypeScript 5.9
+- **Angular Material 21** — tables, forms, dialogs, sidenav, cards, chips, tooltips
+- **RxJS** — reactive state management
+- **Angular Router** — role-based route guards
+- **Vitest** — unit testing
 
 ### DevOps
-- **Docker** & **Docker Compose**
-- **Maven Wrapper**
+- **Docker** multi-stage build + **Docker Compose** (staging & production profiles)
+- **Spring Boot Actuator** — health checks
+- **Maven Wrapper** — no Maven install required
 
-## 📋 Prerequisites
+---
 
-- **Java 21** or higher
-- **Node.js** 20+ and **npm** 10+
-- **PostgreSQL 13+**
-- **Docker** & **Docker Compose** (for containerized deployment)
-- **Maven 3.9+** (or use the included Maven wrapper)
+## 🔧 Quick Start (Local Development)
 
-## 🔧 Installation & Setup
+### Prerequisites
+- **Java 21**
+- **Node.js 20+** (only for building the Angular frontend)
+- No PostgreSQL needed — local dev uses H2 in-memory.
 
-### Option 1: Docker Compose (Recommended)
+### 1. Clone & set up environment
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd car-dealership-management
-   ```
+```bash
+cd car-dealership-management
 
-2. **(Optional) Copy the demo environment file**
-   ```bash
-   cp .env.example .env
-   ```
-   The included `.env.example` contains insecure demo defaults for local use only.
+# Copy the env template (already has sensible dev defaults)
+cp .env.example .env
 
-3. **Build and run with Docker Compose**
+# Generate a real JWT secret:
+# sed -i "s|change-me-to-a-real-base64-secret|$(openssl rand -base64 64)|" .env
 
-   **For Staging Environment:**
-   ```bash
-   docker compose up --build -d database staging
-   ```
-   Access at: http://localhost:5000
-
-   **For Production Environment:**
-   ```bash
-   docker compose up --build -d database production
-   ```
-   Access at: http://localhost:6001
-
-4. **View logs**
-   ```bash
-   docker compose logs -f staging
-   # or
-   docker compose logs -f production
-   ```
-
-5. **Stop services**
-   ```bash
-   docker compose down
-   ```
-
-### Option 2: Manual Setup
-
-#### 1. Database Setup
-
-Create a PostgreSQL database:
-```sql
-CREATE DATABASE carsdb;
-CREATE USER cars WITH PASSWORD 'localdev';
-GRANT ALL PRIVILEGES ON DATABASE carsdb TO cars;
+# Load env vars
+set -a && source .env && set +a
 ```
 
-#### 2. Backend Setup
+### 2. Start the backend
 
-1. **Set environment variables**
+```bash
+./mvnw spring-boot:run
+```
 
-   In your terminal:
-   ```bash
-   export JWT_SECRET=$(openssl rand -base64 64)
-   export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/carsdb
-   export SPRING_DATASOURCE_USERNAME=cars
-   export SPRING_DATASOURCE_PASSWORD=localdev
-   ```
+The app starts at **http://localhost:8080** with:
+- Angular frontend served from embedded static files
+- Swagger UI at http://localhost:8080/swagger-ui.html
+- H2 console at http://localhost:8080/h2-console
 
-   Or copy the included demo values:
-   ```bash
-   cp .env.example .env
-   set -a
-   source .env
-   set +a
-   ```
+### 3. Login as SITE_ADMIN
 
-2. **Build and run the backend**
-   ```bash
-   # Using Maven wrapper (recommended)
-   ./mvnw clean install
-   ./mvnw spring-boot:run
+On first boot, the `DataInitializer` creates the platform admin account using
+the `SITE_ADMIN_EMAIL` and `SITE_ADMIN_PASSWORD` env vars:
 
-   # Or using Maven
-   mvn clean install
-   mvn spring-boot:run
-   ```
+- **Email:** `admin@dealership.local` (from `.env`)
+- **Password:** `Admin123!` (from `.env`)
 
-   The backend will start at: http://localhost:8080
+After logging in, you'll be routed to the SITE_ADMIN dashboard.
 
-#### 3. Frontend Setup
+### 4. Build the frontend (only if you modify Angular code)
 
-1. **Navigate to the webapp directory**
-   ```bash
-   cd src/main/webapp
-   ```
+```bash
+cd src/main/webapp
+npm install
+npm run build    # builds and copies to src/main/resources/static/
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+The frontend dev server (`npm start` on port 4200) proxies API calls to the
+backend via `proxy-conf.json`.
 
-3. **Start the development server**
-   ```bash
-   npm start
-   ```
-   
-   The frontend will start at: http://localhost:4200
+---
 
-4. **Build for production**
-   ```bash
-   npm run build
-   ```
-   This will build the Angular app and copy the static files to `src/main/resources/static/`
+## 🐳 Docker Deployment
+
+### Staging (port 5000)
+
+```bash
+docker compose up --build -d database staging
+```
+
+### Production (port 6001)
+
+```bash
+docker compose up --build -d database production
+```
+
+Both services require these env vars (set in `.env`):
+- `JWT_SECRET` — Base64-encoded signing key (required, no default)
+- `SITE_ADMIN_EMAIL` / `SITE_ADMIN_PASSWORD` — first-run admin bootstrap
+- `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` — database credentials
+
+---
 
 ## 🧪 Testing
 
-### Run All Tests
 ```bash
+# Run all tests
 ./mvnw test
 ```
 
-### Run Specific Test Suites
+### Test suites
 
-The project includes multiple test suites:
-- **Smoke Tests**: Basic functionality checks
-- **Functional Tests**: Feature-level testing
-- **Performance Tests**: Load and performance testing
+| Suite | Count | Covers |
+|---|---|---|
+| `PackageLimitEnforcementTest` | 5 | Car listing limits, seat limits, package downgrade, deactivated employees |
+| `Phase2ManagementTest` | 13 | Role enforcement (SITE_ADMIN-only endpoints), seat limits, suspension, cross-dealer scoping |
+| `DealerScopingTest` | 13 | Cross-dealer isolation, DEALER_EMPLOYEE permissions, SITE_ADMIN access |
+| `SecurityTest` | 3 | SQL injection, XSS resistance, auth check performance |
+| `FunctionalTest` | 6 | End-to-end API flows |
+| `CarRestControllerTest` | 3 | Car endpoints with mocked service |
+| `SmokeTest` | 3 | Application context, health checks |
+| `PerformanceTest` | 2 | Response time assertions |
+| `JwtServiceTest` | 3 | Token generation, validation, expiry |
+| `AuthenticationServiceTest` | 2 | Login/register flows |
+| `A2ApplicationTests` | 1 | Spring context loads |
 
-Run specific tests:
-```bash
-./mvnw test -Dtest=SmokeTest
-./mvnw test -Dtest=FunctionalTest
-./mvnw test -Dtest=PerformanceTest
-```
+---
+
+## 🔒 Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `SPRING_PROFILES_ACTIVE` | Yes | `local` (H2 + Swagger) or `prod` (PostgreSQL) |
+| `JWT_SECRET` | **Yes** | Base64 secret for JWT signing. Generate: `openssl rand -base64 64` |
+| `JWT_EXPIRATION_MS` | No | Token lifetime in ms (default: 86400000 = 24 h) |
+| `SITE_ADMIN_EMAIL` | **Yes** | First-run admin account email |
+| `SITE_ADMIN_PASSWORD` | **Yes** | First-run admin account password |
+| `SPRING_DATASOURCE_URL` | Prod only | PostgreSQL JDBC URL |
+| `SPRING_DATASOURCE_USERNAME` | Prod only | Database username |
+| `SPRING_DATASOURCE_PASSWORD` | Prod only | Database password |
+| `POSTGRES_USER` | Docker only | Postgres container user |
+| `POSTGRES_PASSWORD` | Docker only | Postgres container password |
+| `POSTGRES_DB` | Docker only | Postgres database name |
+
+---
+
+## 🧭 How to Test Each Role Locally
+
+### SITE_ADMIN
+1. Start the app → login with the bootstrapped admin credentials.
+2. You land on the SITE_ADMIN dashboard.
+3. **Create a Package** (e.g. "Starter" with 5 seats, 20 cars).
+4. **Register a Dealer** — this creates both the dealer and its first
+   DEALER_ADMIN account.
+
+### DEALER_ADMIN
+1. Use the credentials from dealer registration (the `adminEmail`/`adminPassword`
+   you provided).
+2. You land on the DEALER_ADMIN dashboard showing that dealer's cars, employee
+   management, and settings.
+3. **Create employees** (up to the package seat limit).
+4. **Add cars** (up to the package listing limit).
+
+### DEALER_EMPLOYEE
+1. Log in with an employee account created by a DEALER_ADMIN.
+2. You land on the DEALER_EMPLOYEE dashboard.
+3. UI buttons are shown/hidden based on your permissions — e.g. "Add Car" is
+   hidden if you lack `CAN_ADD_CAR`.
+
+---
+
+## 📖 API Documentation
+
+- **Swagger UI:** http://localhost:8080/swagger-ui.html (local profile only)
+- **Raw OpenAPI:** http://localhost:8080/v3/api-docs
+
+Endpoints are grouped into: **Auth**, **Cars**, **Dealers**, **Packages**, **Employees**.
+
+---
 
 ## 📁 Project Structure
 
 ```
 car-dealership-management/
-├── src/
-│   ├── main/
-│   │   ├── java/ca/sheridancollege/munjalru/
-│   │   │   ├── A2Application.java          # Main application class
-│   │   │   ├── beans/                      # Bean configurations
-│   │   │   ├── config/                     # Security & app configurations
-│   │   │   ├── controllers/                # REST controllers
-│   │   │   │   ├── AuthenticationController.java
-│   │   │   │   ├── CarRestController.java
-│   │   │   │   └── DealerRestController.java
-│   │   │   ├── models/                     # Entity models
-│   │   │   ├── repositories/               # JPA repositories
-│   │   │   └── services/                   # Business logic
-│   │   ├── resources/
-│   │   │   ├── application.yml             # Application configuration
-│   │   │   └── static/                     # Built frontend files
-│   │   └── webapp/                         # Angular frontend
-│   │       ├── src/
-│   │       │   ├── app/
-│   │       │   │   ├── components/         # Reusable components
-│   │       │   │   ├── guards/             # Route guards
-│   │       │   │   ├── interceptors/       # HTTP interceptors
-│   │       │   │   ├── pages/              # Page components
-│   │       │   │   └── services/           # Angular services
-│   │       │   ├── index.html
-│   │       │   ├── main.ts
-│   │       │   └── styles.css
-│   │       ├── angular.json
-│   │       ├── proxy-conf.json             # Dev server proxy config
-│   │       └── package.json
-│   └── test/                               # Test files
-├── compose.yaml                             # Docker Compose configuration
-├── Dockerfile                               # Container definition
-├── pom.xml                                  # Maven configuration
-└── README.md
+├── src/main/java/.../
+│   ├── beans/          # JPA entities: Car, Dealer, User, Package, Permission, Role
+│   ├── config/         # Security, JWT filter, DataInitializer, OpenAPI config
+│   ├── controllers/    # REST controllers (Car, Dealer, Employee, Package, Auth)
+│   ├── dto/            # Request/Response DTOs with validation
+│   ├── exception/      # GlobalExceptionHandler + ApiError
+│   ├── mapper/         # Entity ↔ DTO mapping
+│   ├── repositories/   # Spring Data JPA repositories
+│   └── services/       # Business logic
+├── src/main/resources/
+│   ├── application.yml           # Base config
+│   ├── application-local.yml     # H2, verbose logs, Swagger on
+│   ├── application-prod.yml      # PostgreSQL, minimal logs, Swagger off
+│   └── static/                   # Built Angular frontend
+├── src/main/webapp/              # Angular source
+│   └── src/app/
+│       ├── pages/                # Login, dashboards (3 roles), forms, tables
+│       ├── guards/               # Role-based route guards
+│       ├── interceptors/         # JWT injection
+│       ├── services/             # Auth, Car, Dealer, Health
+│       └── components/           # Health indicator
+├── src/test/                     # 54 integration tests (10 suites)
+├── docs/
+│   └── DESIGN_DECISIONS.md       # Architectural tradeoffs for interview prep
+├── compose.yaml                  # Docker Compose (staging + production + Postgres)
+├── Dockerfile                    # Multi-stage build (Maven → JRE)
+└── .env.example                  # Environment variable template
 ```
 
-## 🔒 Security
-
-The application uses JWT (JSON Web Tokens) for authentication and authorization:
-
-- **JWT Secret**: Configure in `application.yml` or environment variables
-- **Token Expiration**: Customizable token lifetime
-- **Password Encryption**: Bcrypt password encoding
-- **CORS**: Configured for frontend-backend communication
-
-## 🌐 API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/login` - User login (returns JWT token)
-- `POST /api/v1/auth/register` - User registration
-
-### Cars
-- `GET /api/v1/cars` - Get paginated list of cars
-- `GET /api/v1/cars/{id}` - Get car by ID
-- `POST /api/v1/cars?dealerId={dealerId}` - Create new car for a dealer
-- `PUT /api/v1/cars/{id}` - Update car
-- `DELETE /api/v1/cars/{id}` - Delete car
-
-### Dealers
-- `GET /api/v1/dealers` - Get paginated list of dealers
-- `GET /api/v1/dealers/{id}` - Get dealer by ID
-- `POST /api/v1/dealers` - Create new dealer
-- `PUT /api/v1/dealers/{id}` - Update dealer
-- `DELETE /api/v1/dealers/{id}` - Delete dealer
-
-### API Documentation
-- `GET /swagger-ui.html` - Swagger UI (OpenAPI/SpringDoc)
-- `GET /v3/api-docs` - Raw OpenAPI JSON
-
-### Health Check
-- `GET /actuator/health` - Application health status
-
-## 🏥 Health Monitoring
-
-The application includes a comprehensive health monitoring system that provides real-time visibility into the application's status.
-
-### Backend - Spring Boot Actuator
-
-The health endpoint is configured in `application.yml`:
-```yaml
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health
-  endpoint:
-    health:
-      show-details: when-authorized
-  health:
-    defaults:
-      enabled: true
-```
-
-**Endpoint**: `GET /actuator/health`
-
-**Response Example**:
-```json
-{
-  "status": "UP"
-}
-```
-
-### Frontend - Real-time Health Indicator
-
-The Angular frontend includes a health indicator component that automatically monitors the backend status.
-
-#### Features:
-- **Automatic Polling**: Checks health status every 30 seconds
-- **Visual Indicators**: Color-coded status display
-  - 🟢 **Green (UP)**: System is healthy and operational
-  - 🔴 **Red (DOWN)**: System is down or unreachable
-  - ⚫ **Gray (UNKNOWN)**: Status not yet determined
-- **Real-time Updates**: Uses RxJS observables for reactive updates
-- **Multiple Display Locations**:
-  - Navigation bar (when logged in)
-  - Fixed footer (visible on all pages)
-
-#### Implementation:
-
-**Health Service** (`src/main/webapp/src/app/services/health.ts`):
-- Polls the `/actuator/health` endpoint
-- Broadcasts status changes using BehaviorSubject
-- Handles errors gracefully
-
-**Health Indicator Component** (`src/main/webapp/src/app/components/health-indicator/`):
-- Subscribes to health status updates
-- Displays color-coded status badge
-- Automatically updates without page refresh
-
-#### Development Server Configuration
-
-For the Angular development server (localhost:5000), the proxy configuration ensures health checks work correctly:
-
-**File**: `src/main/webapp/proxy-conf.json`
-```json
-{
-  "/api/v1": {
-    "target": "http://localhost:8080",
-    "secure": false
-  },
-  "/actuator": {
-    "target": "http://localhost:8080",
-    "secure": false
-  }
-}
-```
-
-This proxies actuator requests to the Spring Boot backend during development.
-
-### Testing Health Monitoring
-
-1. **Check backend health directly**:
-   ```bash
-   curl http://localhost:8080/actuator/health
-   ```
-
-2. **View in browser**:
-   - Production: http://localhost:6001 (health indicator in UI)
-   - Development: http://localhost:5000 (health indicator in UI)
-
-3. **Test failure scenarios**:
-   - Stop the Spring Boot backend
-   - Observe the health indicator turn red and display "DOWN"
-   - Restart the backend
-   - Watch the indicator automatically update to green "UP"
-
-## 🐳 Docker Services
-
-The Docker Compose setup includes:
-
-### Services
-- **staging**: Staging environment (Port 5000)
-- **production**: Production environment (Port 6001)
-- **database**: PostgreSQL database (Port 5433 on the host, 5432 in the container)
-
-### Networking
-All services communicate through the `app-network` bridge network.
-
-### Volumes
-- `postgres-data`: Persistent storage for PostgreSQL data
-
-## 📝 Environment Variables
-
-The demo values below are in `.env.example`. Copy them to `.env` and override as needed:
-
-```env
-JWT_SECRET=lLkWl475AXcZRZukLjUfcVX/BOPOqnkIxXY3LOHC9VmwDcH3lqno3uRbzegqhn8T4crRwlgMEVCkLr+b1B3hXQ==
-JWT_EXPIRATION_MS=86400000
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/carsdb
-SPRING_DATASOURCE_USERNAME=cars
-SPRING_DATASOURCE_PASSWORD=localdev
-POSTGRES_USER=cars
-POSTGRES_PASSWORD=localdev
-POSTGRES_DB=carsdb
-```
-
-## 🔧 Development
-
-### Hot Reload
-
-**Backend**: Spring Boot DevTools is included for automatic restart on code changes.
-
-**Frontend**: Angular CLI provides hot reload during development:
-```bash
-cd src/main/webapp
-npm start
-```
-
-### Code Quality
-
-The project includes templates for:
-- Code reviews (`docs/CODE_REVIEW_TEMPLATE.md`)
-- Issue reporting (`docs/ISSUE_TEMPLATE.md`)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+---
 
 ## 📄 License
 
@@ -407,8 +254,5 @@ This project is part of academic coursework at Sheridan College.
 
 ## 👥 Authors
 
-- **Rupin Munjal** - *Initial work*
-- **Amninder Kaur** - *Initial work*
-
-
-**Note**: This is an educational project developed as part of coursework at Sheridan College.
+- **Rupin Munjal**
+- **Amninder Kaur**
