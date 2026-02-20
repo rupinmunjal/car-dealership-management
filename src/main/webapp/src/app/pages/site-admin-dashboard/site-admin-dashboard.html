@@ -2,15 +2,20 @@
   <button mat-icon-button (click)="sidenav.toggle()">
     <mat-icon>menu</mat-icon>
   </button>
-  <span>🔧 SITE ADMIN Dashboard</span>
+  <span>AutoDealer Pro — SITE ADMIN</span>
   <span class="spacer"></span>
   <app-health-indicator></app-health-indicator>
-  <button mat-button (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
+  <button mat-button (click)="logout()">
+    <mat-icon>logout</mat-icon> Logout
+  </button>
 </mat-toolbar>
 
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #sidenav mode="side" opened class="sidenav">
     <mat-nav-list>
+      <div style="padding: 20px 16px 12px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Management</div>
+      </div>
       <a mat-list-item routerLink="/dealers" routerLinkActive="active-link">
         <mat-icon matListItemIcon>business</mat-icon> Dealers
       </a>
@@ -28,27 +33,47 @@
 
   <mat-sidenav-content class="sidenav-content">
     <div class="page-container">
-      <h2>Platform Overview</h2>
+      <h2 class="page-title">Platform Overview</h2>
+      <p class="admin-welcome">Manage dealerships, subscription packages, and monitor the entire platform from one place.</p>
+
       <div class="dashboard-grid">
         <mat-card class="dashboard-card" routerLink="/dealers" appearance="outlined">
           <mat-card-content>
-            <div class="card-icon-wrapper"><mat-icon>business</mat-icon></div>
+            <div class="card-icon-wrapper blue">
+              <mat-icon>business</mat-icon>
+            </div>
             <mat-card-title>Manage Dealers</mat-card-title>
-            <p>View, edit, suspend, or delete dealerships</p>
+            <p>View, edit, suspend, or delete dealerships across the platform</p>
           </mat-card-content>
         </mat-card>
+
         <mat-card class="dashboard-card" routerLink="/dealers/register" appearance="outlined">
           <mat-card-content>
-            <div class="card-icon-wrapper"><mat-icon>add_business</mat-icon></div>
+            <div class="card-icon-wrapper green">
+              <mat-icon>add_business</mat-icon>
+            </div>
             <mat-card-title>Register Dealer</mat-card-title>
-            <p>Create a new dealer with its admin account</p>
+            <p>Create a new dealership with its own admin account and package assignment</p>
           </mat-card-content>
         </mat-card>
+
         <mat-card class="dashboard-card" routerLink="/packages" appearance="outlined">
           <mat-card-content>
-            <div class="card-icon-wrapper"><mat-icon>inventory_2</mat-icon></div>
+            <div class="card-icon-wrapper purple">
+              <mat-icon>inventory_2</mat-icon>
+            </div>
             <mat-card-title>Subscription Packages</mat-card-title>
-            <p>Manage seat and listing limits per package</p>
+            <p>Define seat limits and car listing caps for each subscription tier</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dashboard-card" routerLink="/cars" appearance="outlined">
+          <mat-card-content>
+            <div class="card-icon-wrapper orange">
+              <mat-icon>directions_car</mat-icon>
+            </div>
+            <mat-card-title>All Cars</mat-card-title>
+            <p>Browse the complete inventory across all registered dealerships</p>
           </mat-card-content>
         </mat-card>
       </div>

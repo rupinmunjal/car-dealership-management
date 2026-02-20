@@ -1,34 +1,80 @@
 <mat-toolbar color="accent">
-  <button mat-icon-button (click)="sidenav.toggle()"><mat-icon>menu</mat-icon></button>
-  <span>🏢 DEALER ADMIN Dashboard</span>
+  <button mat-icon-button (click)="sidenav.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>DEALER ADMIN — Your Dealership</span>
   <span class="spacer"></span>
   <app-health-indicator></app-health-indicator>
-  <button mat-button (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
+  <button mat-button (click)="logout()">
+    <mat-icon>logout</mat-icon> Logout
+  </button>
 </mat-toolbar>
+
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #sidenav mode="side" opened class="sidenav">
     <mat-nav-list>
-      <a mat-list-item routerLink="/cars" routerLinkActive="active-link"><mat-icon matListItemIcon>directions_car</mat-icon> My Cars</a>
-      <a mat-list-item routerLink="/cars/add" routerLinkActive="active-link"><mat-icon matListItemIcon>add</mat-icon> Add Car</a>
-      <a mat-list-item routerLink="/dealers/employees" routerLinkActive="active-link"><mat-icon matListItemIcon>people</mat-icon> Employees</a>
-      <a mat-list-item routerLink="/dealers/settings" routerLinkActive="active-link"><mat-icon matListItemIcon>settings</mat-icon> Settings</a>
+      <div style="padding: 20px 16px 12px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Dealership</div>
+      </div>
+      <a mat-list-item routerLink="/cars" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>directions_car</mat-icon> My Cars
+      </a>
+      <a mat-list-item routerLink="/cars/add" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>add</mat-icon> Add Car
+      </a>
+      <a mat-list-item routerLink="/dealers/employees" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>people</mat-icon> Employees
+      </a>
+      <a mat-list-item routerLink="/dealers/settings" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>settings</mat-icon> Settings
+      </a>
     </mat-nav-list>
   </mat-sidenav>
+
   <mat-sidenav-content class="sidenav-content">
     <div class="page-container">
-      <h2>Dealership Dashboard</h2>
+      <h2 class="page-title">Dealership Dashboard</h2>
+      <p class="page-subtitle">Manage your inventory, team, and dealership settings from one place.</p>
+
       <div class="dashboard-grid">
         <mat-card class="dashboard-card" routerLink="/cars" appearance="outlined">
-          <mat-card-content><div class="card-icon-wrapper"><mat-icon>directions_car</mat-icon></div><mat-card-title>Cars</mat-card-title><p>View and manage inventory</p></mat-card-content>
+          <mat-card-content>
+            <div class="card-icon-wrapper blue">
+              <mat-icon>directions_car</mat-icon>
+            </div>
+            <mat-card-title>Cars</mat-card-title>
+            <p>View and manage your full vehicle inventory</p>
+          </mat-card-content>
         </mat-card>
+
         <mat-card class="dashboard-card" routerLink="/cars/add" appearance="outlined">
-          <mat-card-content><div class="card-icon-wrapper"><mat-icon>add</mat-icon></div><mat-card-title>Add Car</mat-card-title><p>Add new vehicles</p></mat-card-content>
+          <mat-card-content>
+            <div class="card-icon-wrapper green">
+              <mat-icon>add</mat-icon>
+            </div>
+            <mat-card-title>Add Car</mat-card-title>
+            <p>Add new vehicles to your dealership inventory</p>
+          </mat-card-content>
         </mat-card>
+
         <mat-card class="dashboard-card" routerLink="/dealers/employees" appearance="outlined">
-          <mat-card-content><div class="card-icon-wrapper"><mat-icon>people</mat-icon></div><mat-card-title>Employees</mat-card-title><p>Manage team and permissions</p></mat-card-content>
+          <mat-card-content>
+            <div class="card-icon-wrapper purple">
+              <mat-icon>people</mat-icon>
+            </div>
+            <mat-card-title>Employees</mat-card-title>
+            <p>Manage your team, permissions, and access levels</p>
+          </mat-card-content>
         </mat-card>
+
         <mat-card class="dashboard-card" routerLink="/dealers/settings" appearance="outlined">
-          <mat-card-content><div class="card-icon-wrapper"><mat-icon>settings</mat-icon></div><mat-card-title>Settings</mat-card-title><p>Dealer configuration</p></mat-card-content>
+          <mat-card-content>
+            <div class="card-icon-wrapper orange">
+              <mat-icon>settings</mat-icon>
+            </div>
+            <mat-card-title>Settings</mat-card-title>
+            <p>Configure dealership name, visibility, and description</p>
+          </mat-card-content>
         </mat-card>
       </div>
     </div>
