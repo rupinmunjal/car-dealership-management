@@ -1,21 +1,54 @@
 <mat-toolbar color="warn">
-  <span>👤 EMPLOYEE Dashboard — {{email}}</span>
+  <span>EMPLOYEE — {{ email }}</span>
   <span class="spacer"></span>
   <app-health-indicator></app-health-indicator>
-  <button mat-button (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
+  <button mat-button (click)="logout()">
+    <mat-icon>logout</mat-icon> Logout
+  </button>
 </mat-toolbar>
+
 <div class="page-container">
-  <h2>My Permissions</h2>
-  <mat-chip-listbox>
-    <mat-chip *ngFor="let p of permissions" color="primary" highlighted>{{ p }}</mat-chip>
-    <mat-chip *ngIf="permissions.length === 0" color="warn">No specific permissions — view only</mat-chip>
-  </mat-chip-listbox>
-  <div class="dashboard-grid" style="margin-top:24px">
+  <h2 class="page-title">My Workspace</h2>
+  <p class="page-subtitle">Your permissions determine what you can do in the dealership.</p>
+
+  <!-- Permissions section -->
+  <mat-card appearance="outlined" style="margin-bottom: 24px;">
+    <mat-card-header>
+      <mat-card-title>Your Permissions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="chips-container">
+        <mat-chip-listbox>
+          <mat-chip *ngFor="let p of permissions" color="primary" highlighted>{{ p }}</mat-chip>
+          <mat-chip *ngIf="permissions.length === 0" color="warn" highlighted>
+            <mat-icon style="font-size: 16px; margin-right: 4px;">info</mat-icon>
+            No specific permissions — view only
+          </mat-chip>
+        </mat-chip-listbox>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Action cards -->
+  <div class="dashboard-grid" style="margin-top: 0;">
     <mat-card class="dashboard-card" routerLink="/cars" appearance="outlined">
-      <mat-card-content><div class="card-icon-wrapper"><mat-icon>directions_car</mat-icon></div><mat-card-title>View Cars</mat-card-title><p>Browse dealership inventory</p></mat-card-content>
+      <mat-card-content>
+        <div class="card-icon-wrapper blue">
+          <mat-icon>directions_car</mat-icon>
+        </div>
+        <mat-card-title>View Cars</mat-card-title>
+        <p>Browse the full dealership inventory</p>
+      </mat-card-content>
     </mat-card>
+
     <mat-card *ngIf="canAddCar" class="dashboard-card" routerLink="/cars/add" appearance="outlined">
-      <mat-card-content><div class="card-icon-wrapper"><mat-icon>add</mat-icon></div><mat-card-title>Add Car</mat-card-title><p>Add new vehicles to inventory</p></mat-card-content>
+      <mat-card-content>
+        <div class="card-icon-wrapper green">
+          <mat-icon>add</mat-icon>
+        </div>
+        <mat-card-title>Add New Car</mat-card-title>
+        <p>You have CAN_ADD_CAR permission — add vehicles here</p>
+      </mat-card-content>
     </mat-card>
   </div>
 </div>
