@@ -1,12 +1,16 @@
-<div class="page-container form-page-container">
+<div class="page-container">
   <div class="page-header">
     <div>
-      <h2 class="page-title">🚗 Add New Car</h2>
-      <p class="page-subtitle">Add a new car to the inventory</p>
+      <h2 class="page-title">Add New Car</h2>
+      <p class="page-subtitle">Add a vehicle to the dealership inventory</p>
     </div>
     <div class="page-actions">
-      <a mat-stroked-button routerLink="/cars"><mat-icon>arrow_back</mat-icon> Back to Cars</a>
-      <a mat-stroked-button routerLink="/"><mat-icon>home</mat-icon> Home</a>
+      <a mat-stroked-button routerLink="/cars">
+        <mat-icon>arrow_back</mat-icon> Back to Cars
+      </a>
+      <a mat-stroked-button routerLink="/">
+        <mat-icon>home</mat-icon> Home
+      </a>
     </div>
   </div>
 
@@ -17,7 +21,6 @@
     </mat-card-header>
 
     <mat-card-content>
-      <!-- Success / Error messages -->
       <div *ngIf="message" class="alert alert-success">
         <mat-icon>check_circle</mat-icon> {{ message }}
       </div>
@@ -28,19 +31,20 @@
       <form (ngSubmit)="onSubmit()" class="form-layout">
         <mat-form-field appearance="outline">
           <mat-label>Car Make</mat-label>
-          <input matInput [(ngModel)]="car.make" name="make" required placeholder="e.g. Toyota">
+          <input matInput [(ngModel)]="car.make" name="make" required placeholder="e.g. Toyota, BMW, Ford">
           <mat-icon matPrefix>directions_car</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Car Model</mat-label>
-          <input matInput [(ngModel)]="car.model" name="model" required placeholder="e.g. Camry">
+          <input matInput [(ngModel)]="car.model" name="model" required placeholder="e.g. Camry, X5, Mustang">
+          <mat-icon matPrefix>drive_eta</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Model Year</mat-label>
           <input matInput type="number" [(ngModel)]="car.modelYear" name="modelYear"
-                 required min="1900" max="2030" placeholder="e.g. 2024">
+                 required min="1900" max="2030" placeholder="e.g. 2026">
           <mat-icon matPrefix>calendar_today</mat-icon>
         </mat-form-field>
 
