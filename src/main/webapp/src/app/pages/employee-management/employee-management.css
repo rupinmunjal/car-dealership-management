@@ -1,1 +1,4 @@
-.page-container{max-width:960px;margin:24px auto}.header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.header-row h2{margin:0}.alert{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:14px}.alert-success{background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9}.alert-error{background:#ffebee;color:#c62828;border:1px solid #ffcdd2}.form-layout{display:flex;flex-direction:column;gap:16px;min-width:320px}
+.form-page-container {
+  max-width: 680px;
+  margin: 24px auto;
+}

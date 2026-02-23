@@ -1,2 +1,6 @@
-.full-width-table { width: 100%; }
-.full-width { width: 100%; }
+/* Package Management — table/button/dialog from global */
+.package-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

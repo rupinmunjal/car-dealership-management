@@ -1,19 +1,91 @@
-<mat-toolbar color="primary"><span>📦 Packages</span><span class="spacer"></span><button mat-flat-button (click)="openCreateDialog()"><mat-icon>add</mat-icon> New Package</button></mat-toolbar>
+<mat-toolbar color="primary">
+  <span>Package Management</span>
+  <span class="spacer"></span>
+  <button mat-flat-button (click)="openCreateDialog()">
+    <mat-icon>add</mat-icon> New Package
+  </button>
+</mat-toolbar>
+
 <div class="page-container">
-  <table mat-table [dataSource]="packages" class="full-width-table">
-    <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Name</th><td mat-cell *matCellDef="let p">{{ p.name }}</td></ng-container>
-    <ng-container matColumnDef="seats"><th mat-header-cell *matHeaderCellDef>Seats</th><td mat-cell *matCellDef="let p">{{ p.maxEmployeeSeats }}</td></ng-container>
-    <ng-container matColumnDef="listings"><th mat-header-cell *matHeaderCellDef>Listings</th><td mat-cell *matCellDef="let p">{{ p.maxCarListings }}</td></ng-container>
-    <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef>Actions</th><td mat-cell *matCellDef="let p"><button mat-icon-button color="warn" (click)="deletePackage(p.id)" matTooltip="Delete"><mat-icon>delete</mat-icon></button></td></ng-container>
-    <tr mat-header-row *matHeaderRowDef="columns"></tr><tr mat-row *matRowDef="let row; columns: columns"></tr>
-  </table>
+  <h2 class="page-title">Subscription Packages</h2>
+  <p class="page-subtitle" style="margin-bottom: 24px;">Define the limits for each subscription tier — seats and car listings.</p>
+
+  <mat-card appearance="outlined">
+    <mat-card-content class="table-container">
+      <table mat-table [dataSource]="packages" class="full-width-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Package Name</th>
+          <td mat-cell *matCellDef="let p">
+            <div class="cell-with-avatar">
+              <div class="avatar purple-bg">{{ p.name ? p.name[0].toUpperCase() : 'P' }}</div>
+              <strong>{{ p.name }}</strong>
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="seats">
+          <th mat-header-cell *matHeaderCellDef>Max Seats</th>
+          <td mat-cell *matCellDef="let p">
+            <mat-chip color="primary" highlighted>{{ p.maxEmployeeSeats }}</mat-chip>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="listings">
+          <th mat-header-cell *matHeaderCellDef>Max Listings</th>
+          <td mat-cell *matCellDef="let p">
+            <mat-chip color="accent" highlighted>{{ p.maxCarListings }}</mat-chip>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let p">
+            <button mat-icon-button color="warn" (click)="deletePackage(p.id)" matTooltip="Delete package">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-state" [attr.colspan]="columns.length">
+            <mat-icon class="empty-icon">inventory_2</mat-icon>
+            <h3>No packages defined</h3>
+            <p>Create your first subscription package to assign to dealers.</p>
+            <button mat-flat-button color="primary" (click)="openCreateDialog()">Create Package</button>
+          </td>
+        </tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
 </div>
+
 <ng-template #dialogTemplate>
-  <h2 mat-dialog-title>{{ editingId ? 'Edit' : 'Create' }} Package</h2>
+  <h2 mat-dialog-title>{{ editingId ? 'Edit Package' : 'Create Package' }}</h2>
   <mat-dialog-content>
-    <mat-form-field appearance="outline" class="full-width"><mat-label>Name</mat-label><input matInput [(ngModel)]="form.name"></mat-form-field>
-    <mat-form-field appearance="outline" class="full-width"><mat-label>Max Seats</mat-label><input matInput type="number" [(ngModel)]="form.maxEmployeeSeats"></mat-form-field>
-    <mat-form-field appearance="outline" class="full-width"><mat-label>Max Listings</mat-label><input matInput type="number" [(ngModel)]="form.maxCarListings"></mat-form-field>
+    <div class="form-layout">
+      <mat-form-field appearance="outline">
+        <mat-label>Package Name</mat-label>
+        <input matInput [(ngModel)]="form.name" placeholder="e.g. Starter, Pro, Enterprise">
+        <mat-icon matPrefix>inventory_2</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Max Employee Seats</mat-label>
+        <input matInput type="number" [(ngModel)]="form.maxEmployeeSeats" min="1">
+        <mat-icon matPrefix>people</mat-icon>
+        <mat-hint>Maximum employees per dealer</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Max Car Listings</mat-label>
+        <input matInput type="number" [(ngModel)]="form.maxCarListings" min="1">
+        <mat-icon matPrefix>directions_car</mat-icon>
+        <mat-hint>Maximum cars per dealer</mat-hint>
+      </mat-form-field>
+    </div>
   </mat-dialog-content>
-  <mat-dialog-actions align="end"><button mat-button (click)="dialogRef?.close()">Cancel</button><button mat-flat-button color="primary" (click)="save()">Save</button></mat-dialog-actions>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef?.close()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="save()">
+      <mat-icon>save</mat-icon> {{ editingId ? 'Update' : 'Create' }}
+    </button>
+  </mat-dialog-actions>
 </ng-template>
