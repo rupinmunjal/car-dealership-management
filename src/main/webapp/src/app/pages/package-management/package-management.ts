@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,13 +11,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-package-management',
   imports: [CommonModule, FormsModule,
-    MatTableModule, MatToolbarModule, MatButtonModule,
+    MatTableModule, MatCardModule, MatToolbarModule, MatButtonModule,
     MatIconModule, MatTooltipModule, MatDialogModule,
-    MatFormFieldModule, MatInputModule],
+    MatFormFieldModule, MatInputModule, MatChipsModule],
   templateUrl: './package-management.html',
   styleUrl: './package-management.css',
 })

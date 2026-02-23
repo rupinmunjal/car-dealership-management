@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth';
 import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +18,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 @Component({
   selector: 'app-employee-management',
   imports: [CommonModule, FormsModule,
-    MatTableModule, MatToolbarModule, MatButtonModule,
+    MatTableModule, MatCardModule, MatToolbarModule, MatButtonModule,
     MatIconModule, MatChipsModule, MatTooltipModule,
     MatDialogModule, MatFormFieldModule, MatInputModule,
     MatSlideToggleModule],
