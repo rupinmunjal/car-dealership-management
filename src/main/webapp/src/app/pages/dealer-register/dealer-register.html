@@ -1,16 +1,55 @@
-<mat-toolbar color="primary"><span>➕ Register New Dealer</span></mat-toolbar>
-<div class="page-container form-page-container">
-  <mat-card appearance="outlined">
-    <mat-card-header><mat-card-title>Create Dealer & Admin Account</mat-card-title><mat-card-subtitle>SITE_ADMIN only</mat-card-subtitle></mat-card-header>
+<mat-toolbar color="primary">
+  <button mat-icon-button routerLink="/dashboard/site-admin">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Register New Dealer</span>
+</mat-toolbar>
+
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Create Dealer & Admin Account</h2>
+      <p class="page-subtitle">Register a new dealership and its first DEALER_ADMIN account in one step.</p>
+    </div>
+  </div>
+
+  <mat-card appearance="outlined" class="form-card">
     <mat-card-content>
-      <div *ngIf="message" class="alert alert-success"><mat-icon>check_circle</mat-icon>{{ message }}</div>
-      <div *ngIf="error" class="alert alert-error"><mat-icon>error</mat-icon>{{ error }}</div>
+      <div *ngIf="message" class="alert alert-success">
+        <mat-icon>check_circle</mat-icon> {{ message }}
+      </div>
+      <div *ngIf="error" class="alert alert-error">
+        <mat-icon>error</mat-icon> {{ error }}
+      </div>
+
       <form (ngSubmit)="onSubmit()" class="form-layout">
-        <mat-form-field appearance="outline"><mat-label>Dealer Name</mat-label><input matInput [(ngModel)]="form.name" name="name" required></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Location</mat-label><input matInput [(ngModel)]="form.location" name="location" required></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Admin Email</mat-label><input matInput type="email" [(ngModel)]="form.adminEmail" name="adminEmail" required></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Admin Password</mat-label><input matInput type="password" [(ngModel)]="form.adminPassword" name="adminPassword" required></mat-form-field>
-        <button mat-flat-button color="primary" type="submit"><mat-icon>add</mat-icon> Register Dealer</button>
+        <mat-form-field appearance="outline">
+          <mat-label>Dealer Name</mat-label>
+          <input matInput [(ngModel)]="form.name" name="name" required placeholder="e.g. Downtown Motors">
+          <mat-icon matPrefix>business</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+          <input matInput [(ngModel)]="form.location" name="location" required placeholder="e.g. Toronto, ON">
+          <mat-icon matPrefix>location_on</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Admin Email</mat-label>
+          <input matInput type="email" [(ngModel)]="form.adminEmail" name="adminEmail" required placeholder="admin@downtownmotors.com">
+          <mat-icon matPrefix>email</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Admin Password</mat-label>
+          <input matInput type="password" [(ngModel)]="form.adminPassword" name="adminPassword" required>
+          <mat-icon matPrefix>lock</mat-icon>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit">
+          <mat-icon>add</mat-icon> Register Dealer
+        </button>
       </form>
     </mat-card-content>
   </mat-card>
