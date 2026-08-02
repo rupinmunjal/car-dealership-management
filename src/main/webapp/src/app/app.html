@@ -1,43 +1,108 @@
-<div class="min-h-screen bg-gray-100">
-  <!-- Navigation Bar -->
-  <nav *ngIf="isLoggedIn()" class="bg-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex">
-          <div class="flex-shrink-0 flex items-center">
-            <h1 class="text-xl font-bold text-gray-800">Car Dealer App</h1>
-          </div>
-          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <a routerLink="/" routerLinkActive="border-indigo-500 text-gray-900" [routerLinkActiveOptions]="{exact: true}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Home
-            </a>
-            <a routerLink="/dealers" routerLinkActive="border-indigo-500 text-gray-900" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Dealers
-            </a>
-            <a routerLink="/cars" routerLinkActive="border-indigo-500 text-gray-900" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Cars
-            </a>
-          </div>
+<div class="min-h-screen bg-background">
+  <ng-container *ngIf="isLoggedIn(); else publicLayout">
+
+    <!-- Fixed Top Toolbar -->
+    <mat-toolbar class="app-toolbar">
+      <button mat-icon-button (click)="sidenav.toggle()" aria-label="Toggle navigation">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="flex items-center gap-3 ml-1">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand shadow-sm">
+          <mat-icon class="text-white">bolt</mat-icon>
         </div>
-        <div class="flex items-center">
-           <app-health-indicator class="mr-4"></app-health-indicator>
-          <span class="text-gray-700 mr-4">Welcome, {{ currentUserEmail() }}</span>
-          <button (click)="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-            Logout
-          </button>
-        </div>
+        <a [routerLink]="getDashboardPath()"
+           class="text-base font-semibold text-white tracking-tight no-underline">AutoDealer Pro</a>
+        <span *ngIf="getRoleTitle()" class="hidden sm:block">
+          <span class="chip chip-toolbar uppercase tracking-wider text-[11px]">
+            {{ getRoleTitle() }}
+          </span>
+        </span>
       </div>
-    </div>
-  </nav>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <span class="spacer"></span>
+
+      <span class="text-[13px] font-medium text-slate-400 hidden sm:block mr-3">{{ currentUserEmail() }}</span>
+      <button (click)="logout()"
+              class="inline-flex min-h-11 items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <mat-icon class="text-slate-400">logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-toolbar>
+
+    <!-- Unified Sidenav Layout -->
+    <mat-sidenav-container class="sidenav-container">
+      <mat-sidenav #sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="!isMobile"
+                   [autoFocus]="false" class="sidenav">
+        <mat-nav-list>
+
+          <!-- SITE_ADMIN Nav Links -->
+          <ng-container *ngIf="isSiteAdmin()">
+            <div class="sidenav-section-label">Management</div>
+            <a mat-list-item routerLink="/dashboard/site-admin" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>dashboard</mat-icon> Overview
+            </a>
+            <a mat-list-item routerLink="/dealers" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>business</mat-icon> Dealers
+            </a>
+            <a mat-list-item routerLink="/dealers/register" routerLinkActive="active-link" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>add_business</mat-icon> Register Dealer
+            </a>
+            <a mat-list-item routerLink="/packages" routerLinkActive="active-link" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>inventory_2</mat-icon> Packages
+            </a>
+            <a mat-list-item routerLink="/cars" routerLinkActive="active-link" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>directions_car</mat-icon> All Cars
+            </a>
+          </ng-container>
+
+          <!-- DEALER_ADMIN Nav Links -->
+          <ng-container *ngIf="isDealerAdmin()">
+            <div class="sidenav-section-label">Dealership</div>
+            <a mat-list-item routerLink="/dashboard/dealer-admin" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>dashboard</mat-icon> Overview
+            </a>
+            <a mat-list-item routerLink="/cars" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>directions_car</mat-icon> My Cars
+            </a>
+            <a mat-list-item routerLink="/cars/add" routerLinkActive="active-link" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>add_circle_outline</mat-icon> Add Car
+            </a>
+            <a mat-list-item routerLink="/dealers/employees" routerLinkActive="active-link" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>people</mat-icon> Employees
+            </a>
+            <a mat-list-item routerLink="/dealers/settings" routerLinkActive="active-link" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>settings</mat-icon> Settings
+            </a>
+          </ng-container>
+
+          <!-- DEALER_EMPLOYEE Nav Links -->
+          <ng-container *ngIf="isDealerEmployee()">
+            <div class="sidenav-section-label">Workspace</div>
+            <a mat-list-item routerLink="/dashboard/dealer-employee" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>dashboard</mat-icon> Workspace
+            </a>
+            <a mat-list-item routerLink="/cars" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>directions_car</mat-icon> View Cars
+            </a>
+            <a *ngIf="canAddCar()" mat-list-item routerLink="/cars/add" routerLinkActive="active-link" (click)="isMobile && sidenav.close()">
+              <mat-icon matListItemIcon>add_circle_outline</mat-icon> Add Car
+            </a>
+          </ng-container>
+
+        </mat-nav-list>
+      </mat-sidenav>
+
+      <!-- Main Outlet Container -->
+      <mat-sidenav-content class="sidenav-content">
+        <router-outlet></router-outlet>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+
+  </ng-container>
+
+  <!-- Public Route Layout (Login/Register) -->
+  <ng-template #publicLayout>
     <router-outlet></router-outlet>
-  </main>
-
-  <!-- Footer with Health Status -->
-  <footer class="fixed bottom-0 right-0 p-4">
-    <app-health-indicator></app-health-indicator>
-  </footer>
+  </ng-template>
 </div>
-
