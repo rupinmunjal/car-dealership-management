@@ -2,20 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { HealthIndicator } from '../../components/health-indicator/health-indicator';
+import { PageHeader } from '../../components';
 
 @Component({
   selector: 'app-dealer-employee-dashboard',
-  imports: [CommonModule, RouterLink,
-    MatToolbarModule, MatCardModule, MatChipsModule,
-    MatIconModule, MatButtonModule, HealthIndicator],
+  imports: [CommonModule, RouterLink, MatIconModule, PageHeader],
   templateUrl: './dealer-employee-dashboard.html',
-  styleUrl: './dealer-employee-dashboard.css',
 })
 export class DealerEmployeeDashboard implements OnInit {
   email: string = '';
@@ -28,6 +21,15 @@ export class DealerEmployeeDashboard implements OnInit {
     this.email = this.authService.getEmail() ?? '';
     this.permissions = this.authService.getPermissions();
     this.canAddCar = this.authService.hasPermission('CAN_ADD_CAR');
+  }
+
+  permissionLabel(permission: string): string {
+    const labels: Record<string, string> = {
+      CAN_ADD_CAR: 'Add cars',
+      CAN_EDIT_CAR: 'Edit cars',
+      CAN_DELETE_CAR: 'Delete cars'
+    };
+    return labels[permission] ?? permission;
   }
 
   logout() { this.authService.logout(); this.router.navigate(['/login']); }

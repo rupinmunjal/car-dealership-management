@@ -1,54 +1,40 @@
-<mat-toolbar color="warn">
-  <span>EMPLOYEE — {{ email }}</span>
-  <span class="spacer"></span>
-  <app-health-indicator></app-health-indicator>
-  <button mat-button (click)="logout()">
-    <mat-icon>logout</mat-icon> Logout
-  </button>
-</mat-toolbar>
+<div class="app-page page-enter">
 
-<div class="page-container">
-  <h2 class="page-title">My Workspace</h2>
-  <p class="page-subtitle">Your permissions determine what you can do in the dealership.</p>
+  <app-page-header label="Workspace" title="My Workspace" [showDashboard]="false"
+                   subtitle="Your permissions determine what you can access."/>
 
-  <!-- Permissions section -->
-  <mat-card appearance="outlined" style="margin-bottom: 24px;">
-    <mat-card-header>
-      <mat-card-title>Your Permissions</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="chips-container">
-        <mat-chip-listbox>
-          <mat-chip *ngFor="let p of permissions" color="primary" highlighted>{{ p }}</mat-chip>
-          <mat-chip *ngIf="permissions.length === 0" color="warn" highlighted>
-            <mat-icon style="font-size: 16px; margin-right: 4px;">info</mat-icon>
-            No specific permissions — view only
-          </mat-chip>
-        </mat-chip-listbox>
-      </div>
-    </mat-card-content>
-  </mat-card>
+  <!-- Permissions card -->
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-6">
+    <h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400 mb-4">Your Permissions</h2>
+    <div class="flex flex-wrap gap-2">
+      <span *ngFor="let p of permissions" class="chip chip-brand">
+        <span class="w-1.5 h-1.5 rounded-full bg-brand-600 inline-block"></span>
+        {{ permissionLabel(p) }}
+      </span>
+      <span *ngIf="permissions.length === 0" class="chip chip-gray">
+        <mat-icon class="text-[14px] w-4 h-4">visibility</mat-icon> View only
+      </span>
+    </div>
+  </div>
 
   <!-- Action cards -->
-  <div class="dashboard-grid" style="margin-top: 0;">
-    <mat-card class="dashboard-card" routerLink="/cars" appearance="outlined">
-      <mat-card-content>
-        <div class="card-icon-wrapper blue">
-          <mat-icon>directions_car</mat-icon>
-        </div>
-        <mat-card-title>View Cars</mat-card-title>
-        <p>Browse the full dealership inventory</p>
-      </mat-card-content>
-    </mat-card>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <a routerLink="/cars"
+       class="group block bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-6 no-underline">
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform gradient-blue shadow-sm">
+        <mat-icon class="text-white">directions_car</mat-icon>
+      </div>
+      <h3 class="text-base font-semibold text-gray-900 group-hover:text-brand-600 transition-colors">View Cars</h3>
+      <p class="mt-1 text-sm text-gray-500">Browse the full dealership inventory</p>
+    </a>
 
-    <mat-card *ngIf="canAddCar" class="dashboard-card" routerLink="/cars/add" appearance="outlined">
-      <mat-card-content>
-        <div class="card-icon-wrapper green">
-          <mat-icon>add</mat-icon>
-        </div>
-        <mat-card-title>Add New Car</mat-card-title>
-        <p>You have CAN_ADD_CAR permission — add vehicles here</p>
-      </mat-card-content>
-    </mat-card>
+    <a *ngIf="canAddCar" routerLink="/cars/add"
+       class="group block bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-6 no-underline">
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform gradient-blue shadow-sm">
+        <mat-icon class="text-white">add_circle</mat-icon>
+      </div>
+      <h3 class="text-base font-semibold text-gray-900 group-hover:text-brand-600 transition-colors">Add New Car</h3>
+      <p class="mt-1 text-sm text-gray-500">Add vehicles to your dealership inventory</p>
+    </a>
   </div>
 </div>

@@ -1,82 +1,89 @@
-<mat-toolbar color="accent">
-  <button mat-icon-button (click)="sidenav.toggle()">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span>DEALER ADMIN — Your Dealership</span>
-  <span class="spacer"></span>
-  <app-health-indicator></app-health-indicator>
-  <button mat-button (click)="logout()">
-    <mat-icon>logout</mat-icon> Logout
-  </button>
-</mat-toolbar>
+<div class="app-page page-enter">
 
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #sidenav mode="side" opened class="sidenav">
-    <mat-nav-list>
-      <div style="padding: 20px 16px 12px;">
-        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Dealership</div>
+  <app-page-header label="Overview" title="Your Dealership" [showDashboard]="false"
+                   subtitle="Manage inventory, team, and settings from one place."/>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <app-stat-card icon="directions_car" color="blue" label="Cars" [value]="carCount" sub="In inventory"/>
+    <app-stat-card icon="people" color="green" label="Employees" [value]="employeeCount" sub="Team members"/>
+    <app-stat-card icon="inventory_2" color="purple" label="Package" [value]="packageName || '—'" [sub]="packageLimits"/>
+    <app-stat-card icon="location_on" color="amber" label="Location" [value]="location || '—'" sub="Dealership location"/>
+  </div>
+
+  <!-- Sections -->
+  <mat-tab-group class="dashboard-tabs">
+    <mat-tab label="Overview">
+      <div class="pt-5">
+        <h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400 mb-3">Quick Actions</h2>
+        <div class="flex flex-wrap gap-3">
+          <app-btn icon="add" routerLink="/cars/add">Add Car</app-btn>
+          <app-btn variant="outline" icon="directions_car" routerLink="/cars">View Cars</app-btn>
+          <app-btn variant="outline" icon="people" routerLink="/dealers/employees">Manage Employees</app-btn>
+          <app-btn variant="outline" icon="settings" routerLink="/dealers/settings">Settings</app-btn>
+        </div>
       </div>
-      <a mat-list-item routerLink="/cars" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>directions_car</mat-icon> My Cars
-      </a>
-      <a mat-list-item routerLink="/cars/add" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>add</mat-icon> Add Car
-      </a>
-      <a mat-list-item routerLink="/dealers/employees" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>people</mat-icon> Employees
-      </a>
-      <a mat-list-item routerLink="/dealers/settings" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>settings</mat-icon> Settings
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
+    </mat-tab>
 
-  <mat-sidenav-content class="sidenav-content">
-    <div class="page-container">
-      <h2 class="page-title">Dealership Dashboard</h2>
-      <p class="page-subtitle">Manage your inventory, team, and dealership settings from one place.</p>
-
-      <div class="dashboard-grid">
-        <mat-card class="dashboard-card" routerLink="/cars" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper blue">
-              <mat-icon>directions_car</mat-icon>
-            </div>
-            <mat-card-title>Cars</mat-card-title>
-            <p>View and manage your full vehicle inventory</p>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="dashboard-card" routerLink="/cars/add" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper green">
-              <mat-icon>add</mat-icon>
-            </div>
-            <mat-card-title>Add Car</mat-card-title>
-            <p>Add new vehicles to your dealership inventory</p>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="dashboard-card" routerLink="/dealers/employees" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper purple">
-              <mat-icon>people</mat-icon>
-            </div>
-            <mat-card-title>Employees</mat-card-title>
-            <p>Manage your team, permissions, and access levels</p>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="dashboard-card" routerLink="/dealers/settings" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper orange">
-              <mat-icon>settings</mat-icon>
-            </div>
-            <mat-card-title>Settings</mat-card-title>
-            <p>Configure dealership name, visibility, and description</p>
-          </mat-card-content>
-        </mat-card>
+    <mat-tab label="Inventory">
+      <div class="pt-5">
+        <app-data-table [rows]="cars" emptyIcon="directions_car" emptyTitle="No cars yet"
+                        emptyText="Add your first car to inventory."
+                        emptyActionLink="/cars/add" emptyActionLabel="Add Car">
+          <thead>
+            <tr>
+              <th>Make</th>
+              <th>Model</th>
+              <th>Year</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of cars">
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-avatar [name]="c.make" color="blue"/>
+                  <span class="font-medium text-gray-900">{{ c.make }}</span>
+                </div>
+              </td>
+              <td class="text-gray-600">{{ c.model }}</td>
+              <td><span class="chip chip-brand">{{ c.modelYear }}</span></td>
+            </tr>
+          </tbody>
+        </app-data-table>
       </div>
-    </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    </mat-tab>
+
+    <mat-tab label="Team">
+      <div class="pt-5">
+        <app-data-table [rows]="employees" emptyIcon="people" emptyTitle="No employees yet"
+                        emptyText="Invite team members to your dealership."
+                        emptyActionLink="/dealers/employees" emptyActionLabel="Manage Employees">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of employees">
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-avatar [name]="e.email" color="green"/>
+                  <span class="font-medium text-gray-900">{{ e.email }}</span>
+                </div>
+              </td>
+              <td class="text-gray-600">{{ e.role }}</td>
+              <td>
+                <span class="chip" [class.chip-green]="e.active !== false" [class.chip-red]="e.active === false">
+                  {{ e.active === false ? 'Inactive' : 'Active' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </app-data-table>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+</div>
