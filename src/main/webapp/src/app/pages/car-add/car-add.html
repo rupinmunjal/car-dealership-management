@@ -1,73 +1,52 @@
-<div class="page-container">
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">Add New Car</h2>
-      <p class="page-subtitle">Add a vehicle to the dealership inventory</p>
-    </div>
-    <div class="page-actions">
-      <a mat-stroked-button routerLink="/cars">
-        <mat-icon>arrow_back</mat-icon> Back to Cars
-      </a>
-      <a mat-stroked-button routerLink="/">
-        <mat-icon>home</mat-icon> Home
-      </a>
-    </div>
-  </div>
+<div class="app-page app-page-form page-enter">
 
-  <mat-card appearance="outlined" class="form-card">
-    <mat-card-header>
-      <mat-card-title>Car Information</mat-card-title>
-      <mat-card-subtitle>Fill in the details to add a new car</mat-card-subtitle>
-    </mat-card-header>
+  <app-page-header label="Inventory" title="Add New Car"
+                   subtitle="Add a vehicle to the dealership inventory">
+    <ng-container header-actions>
+      <app-btn variant="outline" icon="arrow_back" routerLink="/cars">Back</app-btn>
+    </ng-container>
+  </app-page-header>
 
-    <mat-card-content>
-      <div *ngIf="message" class="alert alert-success">
-        <mat-icon>check_circle</mat-icon> {{ message }}
-      </div>
-      <div *ngIf="error" class="alert alert-error">
-        <mat-icon>error</mat-icon> {{ error }}
-      </div>
+  <app-alert type="success" [message]="message" [dismissible]="true" (dismissed)="message = ''"/>
+  <app-alert type="error" [message]="error" [dismissible]="true" (dismissed)="error = ''"/>
 
-      <form (ngSubmit)="onSubmit()" class="form-layout">
-        <mat-form-field appearance="outline">
-          <mat-label>Car Make</mat-label>
-          <input matInput [(ngModel)]="car.make" name="make" required placeholder="e.g. Toyota, BMW, Ford">
-          <mat-icon matPrefix>directions_car</mat-icon>
-        </mat-form-field>
+  <mat-card class="form-card">
+    <form #carForm="ngForm" (ngSubmit)="onSubmit()" class="p-6 space-y-5">
 
-        <mat-form-field appearance="outline">
-          <mat-label>Car Model</mat-label>
-          <input matInput [(ngModel)]="car.model" name="model" required placeholder="e.g. Camry, X5, Mustang">
-          <mat-icon matPrefix>drive_eta</mat-icon>
-        </mat-form-field>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Make</mat-label>
+        <mat-icon matPrefix>directions_car</mat-icon>
+        <input matInput type="text" [(ngModel)]="car.make" name="make" required placeholder="e.g. Toyota, BMW">
+      </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Model Year</mat-label>
-          <input matInput type="number" [(ngModel)]="car.modelYear" name="modelYear"
-                 required min="1900" max="2030" placeholder="e.g. 2026">
-          <mat-icon matPrefix>calendar_today</mat-icon>
-        </mat-form-field>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Model</mat-label>
+        <mat-icon matPrefix>model_training</mat-icon>
+        <input matInput type="text" [(ngModel)]="car.model" name="model" required placeholder="e.g. Camry, X5">
+      </mat-form-field>
 
-        <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Model Year</mat-label>
+        <mat-icon matPrefix>calendar_today</mat-icon>
+        <input matInput type="number" [(ngModel)]="car.modelYear" name="modelYear" required min="1900" max="2030" placeholder="e.g. 2026">
+      </mat-form-field>
+
+      @if (isSiteAdmin) {
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Assign to Dealer</mat-label>
-          <mat-select [(ngModel)]="selectedDealerId" name="dealerId" required>
-            <mat-option [value]="0" disabled>Select a dealer...</mat-option>
-            <mat-option *ngFor="let dealer of dealers" [value]="dealer.id">
-              {{ dealer.name }} — {{ dealer.location }}
-            </mat-option>
+          <mat-select [(ngModel)]="selectedDealerId" name="dealerId" required placeholder="Select a dealer...">
+            <mat-option *ngFor="let dealer of dealers" [value]="dealer.id">{{ dealer.name }} — {{ dealer.location }}</mat-option>
           </mat-select>
-          <mat-icon matPrefix>business</mat-icon>
         </mat-form-field>
+      }
 
-        <div class="form-actions">
-          <button mat-flat-button color="primary" type="submit">
-            <mat-icon>add</mat-icon> Add Car
-          </button>
-          <button mat-stroked-button type="button" (click)="resetForm()">
-            <mat-icon>refresh</mat-icon> Reset
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
+      <div class="flex gap-3 pt-2">
+        <app-btn type="submit" [disabled]="carForm.invalid || selectedDealerId === null"
+                 [loading]="submitting" icon="add">Add Car</app-btn>
+        <app-btn variant="outline" icon="refresh" type="button" (clicked)="resetForm()">Reset</app-btn>
+      </div>
+
+    </form>
   </mat-card>
+
 </div>

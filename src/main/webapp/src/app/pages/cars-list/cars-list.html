@@ -1,109 +1,51 @@
-<div class="page-container">
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">🚗 Cars Inventory</h2>
-      <p class="page-subtitle">Manage and view all cars in the dealership</p>
-    </div>
-    <div class="page-actions">
-      <a mat-flat-button *ngIf="isAdmin" color="primary" routerLink="/cars/add">
-        <mat-icon>add</mat-icon> Add Car
-      </a>
-      <a mat-stroked-button routerLink="/">
-        <mat-icon>arrow_back</mat-icon> Home
-      </a>
-    </div>
+<div class="app-page page-enter">
+
+  <app-page-header label="Inventory" title="Cars Inventory"
+                   subtitle="Manage and view all cars in the dealership">
+    <ng-container header-actions>
+      <app-btn *ngIf="isAdmin" icon="add" routerLink="/cars/add">Add Car</app-btn>
+    </ng-container>
+  </app-page-header>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+    <app-stat-card icon="directions_car" color="blue" label="Total Cars" [value]="cars.length" sub="In inventory"/>
+    <app-stat-card icon="check_circle" color="green" label="Available" [value]="cars.length" sub="Listed now"/>
+    <app-stat-card class="col-span-2 sm:col-span-1" icon="local_offer" color="purple" label="Brands" [value]="uniqueBrandsCount" sub="Unique makes"/>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="stats-row">
-    <mat-card appearance="outlined">
-      <mat-card-content class="stat-card">
-        <mat-icon class="stat-icon blue">directions_car</mat-icon>
-        <div>
-          <span class="stat-value">{{ cars.length }}</span>
-          <span class="stat-label">Total Cars</span>
-        </div>
-      </mat-card-content>
-    </mat-card>
+  <!-- Table -->
+  <app-data-table [rows]="cars" emptyIcon="directions_car" emptyTitle="No cars found"
+                  emptyText="Get started by adding your first vehicle."
+                  [emptyActionLink]="isAdmin ? '/cars/add' : undefined"
+                  emptyActionLabel="Add First Car"
+                  [emptyActionHidden]="!isAdmin">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Make</th>
+        <th>Model</th>
+        <th>Year</th>
+        <th *ngIf="isAdmin">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let car of cars">
+        <td class="text-gray-400 text-xs font-mono">{{ car.id }}</td>
+        <td>
+          <div class="flex items-center gap-3">
+            <app-avatar [name]="car.make" color="blue" [size]="32"/>
+            <span class="font-medium text-gray-900">{{ car.make }}</span>
+          </div>
+        </td>
+        <td class="text-gray-600">{{ car.model }}</td>
+        <td><span class="chip chip-brand">{{ car.modelYear }}</span></td>
+        <td *ngIf="isAdmin">
+          <app-btn variant="danger" icon="delete" ariaLabel="Delete car" title="Delete car"
+                   (clicked)="deleteCar(car.id)"/>
+        </td>
+      </tr>
+    </tbody>
+  </app-data-table>
 
-    <mat-card appearance="outlined">
-      <mat-card-content class="stat-card">
-        <mat-icon class="stat-icon green">check_circle</mat-icon>
-        <div>
-          <span class="stat-value">{{ cars.length }}</span>
-          <span class="stat-label">Available</span>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card appearance="outlined">
-      <mat-card-content class="stat-card">
-        <mat-icon class="stat-icon purple">local_offer</mat-icon>
-        <div>
-          <span class="stat-value">{{ uniqueBrandsCount }}</span>
-          <span class="stat-label">Brands</span>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Cars Table -->
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Cars List</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="table-container">
-      <table mat-table [dataSource]="cars" class="full-width-table">
-
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let car">{{ car.id }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="make">
-          <th mat-header-cell *matHeaderCellDef>Make</th>
-          <td mat-cell *matCellDef="let car">
-            <div class="cell-with-avatar">
-              <div class="avatar blue-bg">{{ car.make ? car.make[0].toUpperCase() : '?' }}</div>
-              {{ car.make }}
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="model">
-          <th mat-header-cell *matHeaderCellDef>Model</th>
-          <td mat-cell *matCellDef="let car">{{ car.model }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="modelYear">
-          <th mat-header-cell *matHeaderCellDef>Year</th>
-          <td mat-cell *matCellDef="let car">
-            <mat-chip>{{ car.modelYear }}</mat-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions" *ngIf="isAdmin">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let car">
-            <button mat-icon-button color="warn" (click)="deleteCar(car.id)" matTooltip="Delete">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        <!-- Empty state -->
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
-            <mat-icon class="empty-icon">inventory_2</mat-icon>
-            <h3>No cars found</h3>
-            <p>Get started by adding your first car.</p>
-            <a mat-flat-button color="primary" *ngIf="isAdmin" routerLink="/cars/add">Add First Car</a>
-          </td>
-        </tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
 </div>

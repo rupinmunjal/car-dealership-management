@@ -2,21 +2,14 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CarService } from '../../services/car';
 import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { AppAvatar, AppButton, DataTable, PageHeader, StatCard } from '../../components';
 
 @Component({
   selector: 'app-cars-list',
-  imports: [CommonModule, RouterModule,
-    MatTableModule, MatCardModule, MatButtonModule,
-    MatIconModule, MatChipsModule, MatTooltipModule],
+  imports: [CommonModule, MatIconModule,
+    PageHeader, StatCard, AppButton, DataTable, AppAvatar],
   templateUrl: './cars-list.html',
-  styleUrl: './cars-list.css',
 })
 export class CarsList implements OnInit {
 
@@ -31,12 +24,6 @@ export class CarsList implements OnInit {
 
   get isAdmin(): boolean {
     return this.authService.isAdmin();
-  }
-
-  get displayedColumns(): string[] {
-    return this.isAdmin
-      ? ['id', 'make', 'model', 'modelYear', 'actions']
-      : ['id', 'make', 'model', 'modelYear'];
   }
 
   ngOnInit(): void {
