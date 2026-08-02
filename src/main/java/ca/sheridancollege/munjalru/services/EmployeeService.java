@@ -36,6 +36,10 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse createEmployee(Long dealerId, CreateEmployeeRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalStateException("An account with this email already exists");
+        }
+
         Dealer dealer = dealerRepository.findById(dealerId)
                 .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + dealerId));
 

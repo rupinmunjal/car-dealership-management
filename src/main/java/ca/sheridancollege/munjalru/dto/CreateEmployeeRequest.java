@@ -22,5 +22,6 @@ public class CreateEmployeeRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-    private Set<String> permissions;
+    @Builder.Default
+    private Set<String> permissions = Set.of();
 }
