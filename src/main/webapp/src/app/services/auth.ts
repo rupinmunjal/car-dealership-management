@@ -53,14 +53,14 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
+    this.getStorage()?.removeItem(this.tokenKey);
     this.currentUserSubject.next(null);
   }
 
   // ── Token management ──────────────────────────────────────────
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return this.getStorage()?.getItem(this.tokenKey) ?? null;
   }
 
   isLoggedIn(): boolean {
@@ -134,7 +134,7 @@ export class AuthService {
 
   private handleAuthResponse(response: AuthenticationResponse): void {
     if (response.token) {
-      localStorage.setItem(this.tokenKey, response.token);
+      this.getStorage()?.setItem(this.tokenKey, response.token);
       const payload = this.decodeToken(response.token);
       this.currentUserSubject.next(payload);
     }
@@ -153,6 +153,12 @@ export class AuthService {
         }
       }
     }
+  }
+
+  private getStorage(): Storage | null {
+    return typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function'
+      ? localStorage
+      : null;
   }
 
   // ── Dashboard routing helper ─────────────────────────────────
