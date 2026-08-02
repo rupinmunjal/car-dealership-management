@@ -1,7 +1,9 @@
 package ca.sheridancollege.munjalru.config;
 
+import ca.sheridancollege.munjalru.beans.Package;
 import ca.sheridancollege.munjalru.beans.Role;
 import ca.sheridancollege.munjalru.beans.User;
+import ca.sheridancollege.munjalru.repositories.PackageRepository;
 import ca.sheridancollege.munjalru.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,23 +12,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Bootstraps the first {@link Role#SITE_ADMIN} account on application startup.
- *
- * <p>Behaviour:
- * <ol>
- *   <li>If a SITE_ADMIN already exists → log and skip.</li>
- *   <li>If no SITE_ADMIN exists and {@code SITE_ADMIN_EMAIL} /
- *       {@code SITE_ADMIN_PASSWORD} are set → create the account.</li>
- *   <li>If no SITE_ADMIN exists and the env vars are <b>not</b> set →
- *       throw {@link IllegalStateException}, crashing startup. There is
- *       no hardcoded fallback.</li>
- * </ol>
+ * Bootstraps initial platform data:
+ * 1. Default subscription packages (Basic, Pro, Enterprise)
+ * 2. The initial {@link Role#SITE_ADMIN} account
  */
 @Slf4j
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final PackageRepository packageRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${SITE_ADMIN_EMAIL:}")
@@ -35,13 +30,30 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${SITE_ADMIN_PASSWORD:}")
     private String siteAdminPassword;
 
-    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(UserRepository userRepository,
+                           PackageRepository packageRepository,
+                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.packageRepository = packageRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) {
+        bootstrapPackages();
+        bootstrapSiteAdmin();
+    }
+
+    private void bootstrapPackages() {
+        if (packageRepository.count() == 0) {
+            packageRepository.save(Package.builder().name("Basic").maxEmployeeSeats(5).maxCarListings(25).build());
+            packageRepository.save(Package.builder().name("Pro").maxEmployeeSeats(15).maxCarListings(100).build());
+            packageRepository.save(Package.builder().name("Enterprise").maxEmployeeSeats(50).maxCarListings(500).build());
+            log.info("Bootstrapped default packages: Basic (5/25), Pro (15/100), Enterprise (50/500)");
+        }
+    }
+
+    private void bootstrapSiteAdmin() {
         boolean siteAdminExists = userRepository.findAll().stream()
                 .anyMatch(u -> u.getRole() == Role.SITE_ADMIN);
 
