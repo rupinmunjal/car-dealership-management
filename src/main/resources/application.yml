@@ -28,6 +28,10 @@ spring:
 
 # ── JWT ───────────────────────────────────────────────────────────
 app:
+  rate-limit:
+    enabled: true
+    general-per-minute: 100
+    auth-per-minute: 10
   jwt:
     # Required — must be set via JWT_SECRET env var (see .env or .env.example).
     secret: ${JWT_SECRET}

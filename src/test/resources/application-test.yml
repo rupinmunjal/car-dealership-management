@@ -19,6 +19,8 @@ spring:
     show-sql: true
 
 app:
+  rate-limit:
+    enabled: false
   jwt:
     secret: DdHcnCpz5Ofm9QiSbEopDNO1yuE2jfPSVdPcJPdWcdhrQ4/rZhgSHDgIbqsw/X62v7qWP8FJ8ttr/D9SW3PfTw==
     # Use a short expiration for tests so token-lifetime tests run quickly.
