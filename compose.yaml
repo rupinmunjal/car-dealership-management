@@ -22,15 +22,15 @@ services:
       # Use the Docker service name 'database' and the internal container port 5432.
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-cars}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-localdev}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:?Set JWT_SECRET in .env}
       - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-86400000}
       # SITE_ADMIN Bootstrap (first-run account creation)
-      - SITE_ADMIN_EMAIL=${SITE_ADMIN_EMAIL}
-      - SITE_ADMIN_PASSWORD=${SITE_ADMIN_PASSWORD}
+      - SITE_ADMIN_EMAIL=${SITE_ADMIN_EMAIL:?Set SITE_ADMIN_EMAIL in .env}
+      - SITE_ADMIN_PASSWORD=${SITE_ADMIN_PASSWORD:?Set SITE_ADMIN_PASSWORD in .env}
       # Ensure Health Endpoint is exposed for Docker Healthcheck
       - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health
     depends_on:
@@ -66,15 +66,15 @@ services:
       # Use the Docker service name 'database' and the internal container port 5432.
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/carsdb
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-cars}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-localdev}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update  # For Docker environment, auto-create schema
       # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:?Set JWT_SECRET in .env}
       - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-86400000}
       # SITE_ADMIN Bootstrap (first-run account creation)
-      - SITE_ADMIN_EMAIL=${SITE_ADMIN_EMAIL}
-      - SITE_ADMIN_PASSWORD=${SITE_ADMIN_PASSWORD}
+      - SITE_ADMIN_EMAIL=${SITE_ADMIN_EMAIL:?Set SITE_ADMIN_EMAIL in .env}
+      - SITE_ADMIN_PASSWORD=${SITE_ADMIN_PASSWORD:?Set SITE_ADMIN_PASSWORD in .env}
       # Ensure Health Endpoint is exposed
       - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health
     depends_on:
@@ -97,16 +97,16 @@ services:
     image: postgres:16-alpine
     container_name: car-dealership-db
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-cars}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-localdev}
-      - POSTGRES_DB=${POSTGRES_DB:-carsdb}
+      - POSTGRES_USER=${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      - POSTGRES_DB=${POSTGRES_DB:?Set POSTGRES_DB in .env}
     ports:
       # Use host port 5433 to avoid clashing with a local Postgres on 5432.
       - "5433:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER:-cars}" ]
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER:?Set POSTGRES_USER in .env}" ]
       interval: 10s
       timeout: 5s
       retries: 5
