@@ -1,57 +1,96 @@
-<div class="auth-container">
-  <mat-card class="auth-card">
-    <mat-card-header>
-      <mat-card-title>Create Account</mat-card-title>
-      <mat-card-subtitle>Join the dealership platform</mat-card-subtitle>
-    </mat-card-header>
+<app-auth-shell>
+  <div class="page-enter">
 
-    <mat-card-content>
-      <form (ngSubmit)="onSubmit()" class="auth-form">
+    <!-- Brand wordmark -->
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 gradient-brand shadow-lg">
+        <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <div>
+        <span class="text-[15px] font-semibold tracking-tight text-gray-900">AutoDealer Pro</span>
+        <p class="text-[11px] font-mono text-gray-400 tracking-wide uppercase">Dealership Management</p>
+      </div>
+    </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email Address</mat-label>
-          <input matInput type="email" [(ngModel)]="user.email" name="email" required
-                 placeholder="your.email@example.com">
-          <mat-icon matPrefix>email</mat-icon>
-          <mat-error>Valid email is required</mat-error>
-        </mat-form-field>
+    <!-- Heading -->
+    <h1 class="text-2xl font-display tracking-tight text-gray-900">Create your account</h1>
+    <p class="mt-1.5 text-sm text-gray-500">Join your dealership platform today</p>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'"
-                 [(ngModel)]="user.password" name="password" required minlength="6">
-          <mat-icon matPrefix>lock</mat-icon>
-          <button mat-icon-button matSuffix type="button"
-                  (click)="hidePassword = !hidePassword"
-                  [attr.aria-label]="'Toggle password visibility'">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+    <!-- Form -->
+    <form (ngSubmit)="onSubmit()" class="mt-7 space-y-4">
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="user.email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+          class="input"
+        />
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+        <div class="relative">
+          <input
+            id="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            [(ngModel)]="user.password"
+            name="password"
+            required
+            minlength="6"
+            autocomplete="new-password"
+            placeholder="At least 6 characters"
+            class="input pr-11"
+          />
+          <button
+            type="button"
+            (click)="hidePassword = !hidePassword"
+            class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded"
+            tabindex="-1"
+            [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+          >
+            <mat-icon class="!text-[18px] leading-none !w-[18px] !h-[18px]">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          <mat-hint>At least 6 characters</mat-hint>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Confirm Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'"
-                 [(ngModel)]="user.confirmPassword" name="confirmPassword" required>
-          <mat-icon matPrefix>check_circle</mat-icon>
-        </mat-form-field>
-
-        <div *ngIf="error" class="error-message">
-          <mat-icon>error_outline</mat-icon>
-          <span>{{ error }}</span>
         </div>
+      </div>
 
-        <button mat-flat-button color="primary" type="submit"
-                class="full-width submit-btn" [disabled]="loading">
-          <mat-spinner *ngIf="loading" diameter="20" class="spinner-inline"></mat-spinner>
-          <span *ngIf="!loading">Create Account</span>
-        </button>
-      </form>
-    </mat-card-content>
+      <!-- Confirm Password -->
+      <div>
+        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1.5">Confirm password</label>
+        <input
+          id="confirmPassword"
+          [type]="hidePassword ? 'password' : 'text'"
+          [(ngModel)]="user.confirmPassword"
+          name="confirmPassword"
+          required
+          autocomplete="new-password"
+          placeholder="Re-enter your password"
+          class="input"
+        />
+      </div>
 
-    <mat-card-actions align="end">
-      <span class="muted">Already have an account?</span>
-      <a mat-button color="primary" routerLink="/login">Sign In</a>
-    </mat-card-actions>
-  </mat-card>
-</div>
+      <!-- Error -->
+      <app-alert type="error" [message]="error" [dismissible]="true" (dismissed)="error = ''"/>
+
+      <!-- Submit -->
+      <app-btn type="submit" variant="primary" [loading]="loading" class="w-full" icon="person_add">Create account</app-btn>
+    </form>
+
+    <!-- Sign in link -->
+    <p class="mt-7 text-center text-sm text-gray-500">
+      Already have an account?
+      <a routerLink="/login" class="ml-1 font-semibold text-brand-600 hover:text-brand-700 hover:underline underline-offset-2 transition-colors">
+        Sign in
+      </a>
+    </p>
+
+  </div>
+</app-auth-shell>

@@ -1,49 +1,72 @@
-<div class="auth-container">
-  <mat-card class="auth-card">
-    <mat-card-header>
-      <mat-card-title>Welcome Back!</mat-card-title>
-      <mat-card-subtitle>Sign in to your dealership account</mat-card-subtitle>
-    </mat-card-header>
+<app-auth-shell>
+  <div class="page-enter">
 
-    <mat-card-content>
-      <form (ngSubmit)="onSubmit()" class="auth-form">
+    <!-- Brand wordmark -->
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 gradient-brand shadow-lg">
+        <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <div>
+        <span class="text-[15px] font-semibold tracking-tight text-gray-900">AutoDealer Pro</span>
+        <p class="text-[11px] font-mono text-gray-400 tracking-wide uppercase">Dealership Management</p>
+      </div>
+    </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email Address</mat-label>
-          <input matInput type="email" [(ngModel)]="credentials.email" name="email" required
-                 placeholder="your.email@example.com">
-          <mat-icon matPrefix>email</mat-icon>
-          <mat-error>Valid email is required</mat-error>
-        </mat-form-field>
+    <!-- Heading -->
+    <h1 class="text-2xl font-display tracking-tight text-gray-900">Welcome back</h1>
+    <p class="mt-1.5 text-sm text-gray-500">Sign in to your account to continue</p>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'"
-                 [(ngModel)]="credentials.password" name="password" required>
-          <mat-icon matPrefix>lock</mat-icon>
-          <button mat-icon-button matSuffix type="button"
-                  (click)="hidePassword = !hidePassword"
-                  [attr.aria-label]="'Toggle password visibility'">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+    <!-- Form -->
+    <form (ngSubmit)="onSubmit()" class="mt-7 space-y-4">
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="credentials.email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+          class="input"
+        />
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+        <div class="relative">
+          <input
+            id="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            [(ngModel)]="credentials.password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="••••••••"
+            class="input pr-11"
+          />
+          <button
+            type="button"
+            (click)="hidePassword = !hidePassword"
+            class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded"
+            tabindex="-1"
+            [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+          >
+            <mat-icon class="!text-[18px] leading-none !w-[18px] !h-[18px]">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-        </mat-form-field>
-
-        <div *ngIf="error" class="error-message">
-          <mat-icon>error_outline</mat-icon>
-          <span>{{ error }}</span>
         </div>
+      </div>
 
-        <button mat-flat-button color="primary" type="submit"
-                class="full-width submit-btn" [disabled]="loading">
-          <mat-spinner *ngIf="loading" diameter="20" class="spinner-inline"></mat-spinner>
-          <span *ngIf="!loading">Sign In</span>
-        </button>
-      </form>
-    </mat-card-content>
+      <!-- Error message -->
+      <app-alert type="error" [message]="error" [dismissible]="true" (dismissed)="error = ''" class="animate-[shake_0.3s_ease-in-out]"/>
 
-    <mat-card-actions align="end">
-      <span class="muted">New to the platform?</span>
-      <a mat-button color="primary" routerLink="/register">Create Account</a>
-    </mat-card-actions>
-  </mat-card>
-</div>
+      <!-- Submit button -->
+      <app-btn type="submit" variant="primary" [loading]="loading" class="w-full" icon="login">Sign in</app-btn>
+    </form>
+
+  </div>
+</app-auth-shell>

@@ -18,7 +18,7 @@ import { authGuard, publicOnlyGuard, roleGuard } from './guards/auth.guard';
 export const routes: Routes = [
   // ── Public routes ──────────────────────────────────────────
   { path: 'login', component: Login, canActivate: [publicOnlyGuard] },
-  { path: 'register', component: Register, canActivate: [publicOnlyGuard] },
+  { path: 'register', redirectTo: 'login' },
 
   // ── Role dashboard routes ──────────────────────────────────
   {
