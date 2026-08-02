@@ -31,9 +31,25 @@ public class DealerManagementService {
      */
     @Transactional
     public DealerResponse createDealerWithAdmin(CreateDealerRequest request) {
+        if (userRepository.findByEmail(request.getAdminEmail()).isPresent()) {
+            throw new IllegalStateException("An account with this email already exists");
+        }
+
+        Package pkg = null;
+        if (request.getPackageId() != null) {
+            pkg = packageRepository.findById(request.getPackageId()).orElse(null);
+        }
+        if (pkg == null) {
+            pkg = packageRepository.findAll().stream().findFirst().orElse(null);
+        }
+
         Dealer dealer = Dealer.builder()
                 .name(request.getName())
                 .location(request.getLocation())
+                .displayName(request.getDisplayName() != null && !request.getDisplayName().isBlank()
+                        ? request.getDisplayName() : request.getName())
+                .description(request.getDescription())
+                .dealerPackage(pkg)
                 .status(DealerStatus.ACTIVE)
                 .visible(true)
                 .build();
@@ -48,6 +64,7 @@ public class DealerManagementService {
                 .dealerStatus(DealerStatus.ACTIVE)
                 .build();
         userRepository.save(admin);
+        dealer.getUsers().add(admin);
 
         return mapper.toDealerResponse(dealer);
     }

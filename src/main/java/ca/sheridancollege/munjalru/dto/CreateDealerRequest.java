@@ -25,4 +25,8 @@ public class CreateDealerRequest {
 
     @NotBlank(message = "Admin password is required")
     private String adminPassword;
+
+    private Long packageId;
+    private String displayName;
+    private String description;
 }

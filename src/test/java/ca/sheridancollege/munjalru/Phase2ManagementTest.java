@@ -89,6 +89,28 @@ public class Phase2ManagementTest extends IntegrationTestBase {
     }
 
     @Test
+    void registeredDealerResponsesIncludeAdminEmail() throws Exception {
+        CreateDealerRequest req = CreateDealerRequest.builder()
+                .name("Email Motors")
+                .location("Toronto")
+                .adminEmail("admin@emailmotors.test")
+                .adminPassword("password")
+                .build();
+
+        mockMvc.perform(post("/api/v1/dealers/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req))
+                        .with(authentication(siteAdminAuth())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.adminEmail").value("admin@emailmotors.test"));
+
+        mockMvc.perform(get("/api/v1/dealers")
+                        .with(authentication(siteAdminAuth())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[1].adminEmail").value("admin@emailmotors.test"));
+    }
+
+    @Test
     void dealerAdminCannotUpdateDealerStatus() throws Exception {
         DealerStatusRequest req = DealerStatusRequest.builder().status("SUSPENDED").build();
         mockMvc.perform(put("/api/v1/dealers/" + dealerA.getId() + "/status")

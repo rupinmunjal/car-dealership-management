@@ -54,11 +54,31 @@ public class CarDealerMapper {
         List<CarResponse> carResponses = dealer.getCars() == null
                 ? List.of()
                 : dealer.getCars().stream().map(this::toCarResponse).toList();
+        List<EmployeeResponse> employeeResponses = dealer.getUsers() == null
+                ? List.of()
+                : dealer.getUsers().stream()
+                        .filter(user -> user.getRole() == Role.DEALER_EMPLOYEE)
+                        .map(this::toEmployeeResponse)
+                        .toList();
+        String adminEmail = dealer.getUsers() == null
+                ? null
+                : dealer.getUsers().stream()
+                        .filter(user -> user.getRole() == Role.DEALER_ADMIN)
+                        .map(User::getEmail)
+                        .findFirst()
+                        .orElse(null);
         return DealerResponse.builder()
                 .id(dealer.getId())
                 .name(dealer.getName())
+                .adminEmail(adminEmail)
                 .location(dealer.getLocation())
+                .status(dealer.getStatus())
+                .displayName(dealer.getDisplayName())
+                .description(dealer.getDescription())
+                .visible(dealer.isVisible())
+                .dealerPackage(toPackageResponse(dealer.getDealerPackage()))
                 .cars(carResponses)
+                .employees(employeeResponses)
                 .build();
     }
 
