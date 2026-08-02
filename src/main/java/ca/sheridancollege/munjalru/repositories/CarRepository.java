@@ -13,13 +13,13 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     @Query("""
             select car from Car car
-            where (:make is null or lower(car.make) like lower(concat('%', :make, '%')))
-              and (:model is null or lower(car.model) like lower(concat('%', :model, '%')))
+            where (:make is null or lower(car.make) like lower(concat('%', cast(:make as string), '%')))
+              and (:model is null or lower(car.model) like lower(concat('%', cast(:model as string), '%')))
               and (:minPrice is null or car.price >= :minPrice)
               and (:maxPrice is null or car.price <= :maxPrice)
               and (:year is null or car.modelYear = :year)
-              and (:search is null or lower(car.make) like lower(concat('%', :search, '%'))
-                   or lower(car.model) like lower(concat('%', :search, '%')))
+              and (:search is null or lower(car.make) like lower(concat('%', cast(:search as string), '%'))
+                   or lower(car.model) like lower(concat('%', cast(:search as string), '%')))
             """)
     Page<Car> findAllFiltered(
             @Param("make") String make,
@@ -33,13 +33,13 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     @Query("""
             select car from Dealer dealer join dealer.cars car
             where dealer.id = :dealerId
-              and (:make is null or lower(car.make) like lower(concat('%', :make, '%')))
-              and (:model is null or lower(car.model) like lower(concat('%', :model, '%')))
+              and (:make is null or lower(car.make) like lower(concat('%', cast(:make as string), '%')))
+              and (:model is null or lower(car.model) like lower(concat('%', cast(:model as string), '%')))
               and (:minPrice is null or car.price >= :minPrice)
               and (:maxPrice is null or car.price <= :maxPrice)
               and (:year is null or car.modelYear = :year)
-              and (:search is null or lower(car.make) like lower(concat('%', :search, '%'))
-                   or lower(car.model) like lower(concat('%', :search, '%')))
+              and (:search is null or lower(car.make) like lower(concat('%', cast(:search as string), '%'))
+                   or lower(car.model) like lower(concat('%', cast(:search as string), '%')))
             """)
     Page<Car> findAllFilteredByDealer(
             @Param("dealerId") Long dealerId,
