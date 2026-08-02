@@ -1,5 +1,7 @@
 # Car Dealership Management System
 
+[![CI](https://github.com/rupinmunjal/car-dealership-management/actions/workflows/ci.yml/badge.svg)](https://github.com/rupinmunjal/car-dealership-management/actions/workflows/ci.yml)
+
 A full-stack web application for managing car dealerships with role-based access
 control, built with **Spring Boot 3.5** (Java 21) and **Angular 21** (Angular Material).
 Designed as a portfolio/showcase project demonstrating JWT authentication,
@@ -28,7 +30,8 @@ redirects them to the correct dashboard automatically. No manual role selection.
   - **Max employee seats** — blocks new hires when limit reached (409 Conflict).
   - **Max car listings** — blocks new cars when limit reached (409 Conflict).
 - **Package downgrade:** Existing employees are **not** retroactively deactivated.
-  Only new hires are blocked. (See `docs/DESIGN_DECISIONS.md` for rationale.)
+  Only new hires are blocked. See
+  [ADR 0001](docs/adr/0001-preserve-employees-after-package-downgrade.md) for the rationale.
 - **DEALER_EMPLOYEE** permissions (`CAN_ADD_CAR`, `CAN_EDIT_CAR`, `CAN_DELETE_CAR`)
   are managed by DEALER_ADMIN through the employee management UI.
 
@@ -40,7 +43,9 @@ redirects them to the correct dashboard automatically. No manual role selection.
 - **Java 21** with **Spring Boot 3.5.7**
 - **Spring Security** — JWT authentication (jjwt 0.12.6)
 - **Spring Data JPA** — Hibernate ORM
+- **Spring Data Redis** — five-minute dashboard summary cache
 - **H2** (local dev) / **PostgreSQL** (production)
+- **Bucket4j** — per-IP API rate limiting
 - **Lombok** — boilerplate reduction
 - **SpringDoc OpenAPI** (2.8.9) — Swagger UI at `/swagger-ui.html`
 - **Maven** — build & dependency management
@@ -53,13 +58,52 @@ redirects them to the correct dashboard automatically. No manual role selection.
 - **Vitest** — unit testing
 
 ### DevOps
-- **Docker** multi-stage build + **Docker Compose** (staging & production profiles)
+- **Docker** multi-stage Angular and Spring build
+- **Docker Compose** for the application, PostgreSQL, and Redis
+- **GitHub Actions** — backend tests, Angular build, container build, and GHCR publishing
 - **Spring Boot Actuator** — health checks
 - **Maven Wrapper** — no Maven install required
 
 ---
 
-## 🔧 Quick Start (Local Development)
+## 🐳 Quick Start with Docker
+
+### Prerequisite
+
+- Docker Desktop or Docker Engine with Compose
+
+Start the complete application from the repository root:
+
+```bash
+docker compose up --build
+```
+
+Open **http://localhost:8080**. Docker builds Angular, packages Spring Boot,
+starts PostgreSQL and Redis, waits for them to become healthy, and then starts
+the application. No local Java, Node.js, Maven, npm, or PostgreSQL installation
+is required.
+
+Press `Ctrl+C` to stop the stack. If started in detached mode, stop the
+stack with:
+
+```bash
+docker compose down
+```
+
+PostgreSQL data remains in the `postgres-data` Docker volume. To also erase the
+database and return to a first-run state:
+
+```bash
+docker compose down --volumes
+```
+
+Compose has local demonstration defaults, including
+`admin@dealership.local` / `Admin123!`. Create a `.env` file with secure values
+before exposing the application outside your machine.
+
+---
+
+## 🔧 Manual Development Setup
 
 ### Prerequisites
 - **Java 21**
@@ -102,6 +146,23 @@ the `SITE_ADMIN_EMAIL` and `SITE_ADMIN_PASSWORD` env vars:
 
 After logging in, you'll be routed to the SITE_ADMIN dashboard.
 
+### Local H2 demo data
+
+The `local` profile also creates three dealerships, ten vehicles, and dealer
+accounts for exercising every role and permission path. These records are not
+created for the `test` or `prod` profiles. All demo accounts use the
+`DEMO_DATA_PASSWORD` value, which defaults to `Demo123!`.
+
+| Account | Role | State |
+|---|---|---|
+| `maple.admin@demo.local` | Dealer admin | Active |
+| `maple.inventory@demo.local` | Employee with all car permissions | Active |
+| `maple.sales@demo.local` | Employee with add/edit permissions | Active |
+| `lakeshore.admin@demo.local` | Dealer admin | Active |
+| `lakeshore.sales@demo.local` | Employee with add permission | Active |
+| `harbour.admin@demo.local` | Dealer admin | Suspended dealer |
+| `harbour.inventory@demo.local` | Employee with all car permissions | Inactive account |
+
 ### 4. Build the frontend (only if you modify Angular code)
 
 ```bash
@@ -115,24 +176,42 @@ backend via `proxy-conf.json`.
 
 ---
 
-## 🐳 Docker Deployment
+## System Architecture
 
-### Staging (port 5000)
-
-```bash
-docker compose up --build -d database staging
+```mermaid
+flowchart LR
+    Browser[Angular 21 SPA] -->|JWT + /api/v1 REST| Security[Spring Security and rate limiter]
+    Security --> Controller[REST controllers]
+    Controller --> Service[Business services]
+    Service -->|dashboard summaries| Redis[(Redis cache)]
+    Service -->|transactions and audit logs| Database[(PostgreSQL or H2)]
 ```
 
-### Production (port 6001)
+- Angular guards control navigation, while Spring Security remains the source
+  of truth for role, dealer, and permission enforcement.
+- Controllers validate HTTP input and delegate business rules to services.
+- Services enforce package limits and dealer scoping, write audit history, and
+  access repositories through Spring Data JPA.
+- Redis caches only derived dashboard summaries. PostgreSQL remains the system
+  of record, and local development can use H2 without a Redis dependency.
 
-```bash
-docker compose up --build -d database production
-```
+### Performance & Security
 
-Both services require these env vars (set in `.env`):
-- `JWT_SECRET` — Base64-encoded signing key (required, no default)
-- `SITE_ADMIN_EMAIL` / `SITE_ADMIN_PASSWORD` — first-run admin bootstrap
-- `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` — database credentials
+- Car, dealer, package, employee, and audit-log collections are paginated, with
+  a default page size of 20 and a maximum page size of 100.
+- Car inventory supports server-side make, model, year, price, global search,
+  and sorting so large datasets are not loaded into the browser.
+- Dealer dashboard summaries are cached for five minutes and evicted after car,
+  employee, dealer, or package mutations.
+- Bucket4j limits API clients to 100 requests per minute per IP and authentication
+  endpoints to 10 requests per minute per IP, returning JSON `429` responses.
+- JWT authentication is stateless, passwords are BCrypt-hashed, and backend
+  authorization tests cover role, permission, and cross-dealer boundaries.
+- GitHub Actions runs Maven tests, the Angular production build, and a Docker
+  build before publishing main-branch images to GHCR.
+
+The architecture decisions behind package downgrades, JWT authentication, and
+Redis cache scope are recorded in [`docs/adr`](docs/adr/).
 
 ---
 
@@ -143,21 +222,19 @@ Both services require these env vars (set in `.env`):
 ./mvnw test
 ```
 
-### Test suites
+### Selected test suites
 
-| Suite | Count | Covers |
-|---|---|---|
-| `PackageLimitEnforcementTest` | 5 | Car listing limits, seat limits, package downgrade, deactivated employees |
-| `Phase2ManagementTest` | 14 | Role enforcement (SITE_ADMIN-only endpoints), seat limits, suspension, cross-dealer scoping |
-| `DealerScopingTest` | 14 | Cross-dealer isolation, DEALER_EMPLOYEE permissions, SITE_ADMIN access |
-| `SecurityTest` | 4 | SQL injection, XSS resistance, auth checks, invalid JWT handling |
-| `FunctionalTest` | 6 | End-to-end API flows |
-| `CarRestControllerTest` | 3 | Car endpoints with mocked service |
-| `SmokeTest` | 3 | Application context, health checks |
-| `PerformanceTest` | 2 | Response time assertions |
-| `JwtServiceTest` | 3 | Token generation, validation, expiry |
-| `AuthenticationServiceTest` | 2 | Login/register flows |
-| `A2ApplicationTests` | 1 | Spring context loads |
+| Suite | Covers |
+|---|---|
+| `CarPaginationTest` | Paging, sorting, make/model/year/price filters, and dealer scoping |
+| `CacheEvictionTest` | Dashboard cache hits and mutation-driven eviction |
+| `AuditLoggingTest` | Mutation history, role access, and dealer isolation |
+| `RateLimitingTest` | General and authentication endpoint limits and `429` responses |
+| `PackageLimitEnforcementTest` | Car limits, seat limits, package downgrade, and deactivated employees |
+| `DealerScopingTest` | Cross-dealer isolation and employee permission enforcement |
+| `SecurityTest` | Injection resistance, authentication checks, and invalid JWT handling |
+| `FunctionalTest` | End-to-end API workflows |
+| `JwtServiceTest` | Token generation, validation, and expiry |
 
 ---
 
@@ -176,6 +253,8 @@ Both services require these env vars (set in `.env`):
 | `POSTGRES_USER` | Docker only | Postgres container user |
 | `POSTGRES_PASSWORD` | Docker only | Postgres container password |
 | `POSTGRES_DB` | Docker only | Postgres database name |
+| `SPRING_DATA_REDIS_HOST` | External prod only | Redis host; Compose sets this internally |
+| `SPRING_DATA_REDIS_PORT` | No | Redis port (default: 6379) |
 
 ---
 
@@ -209,7 +288,8 @@ Both services require these env vars (set in `.env`):
 - **Swagger UI:** http://localhost:8080/swagger-ui.html (local profile only)
 - **Raw OpenAPI:** http://localhost:8080/v3/api-docs
 
-Endpoints are grouped into: **Auth**, **Cars**, **Dealers**, **Packages**, **Employees**.
+REST endpoints use the `/api/v1` prefix and are grouped into **Auth**, **Cars**,
+**Dealers**, **Packages**, **Employees**, and **Audit Logs**.
 
 ---
 
@@ -238,9 +318,10 @@ car-dealership-management/
 │       ├── interceptors/         # JWT injection
 │       ├── services/             # Auth, Car, Dealer, Health
 │       └── components/           # Shared UI primitives
-├── src/test/                     # 57 tests (11 suites)
-├── compose.yaml                  # Docker Compose (staging + production + Postgres)
-├── Dockerfile                    # Multi-stage build (Maven → JRE)
+├── src/test/                     # Backend unit and integration tests
+├── docs/adr/                     # Architecture decision records
+├── compose.yaml                  # Complete app + PostgreSQL + Redis stack
+├── Dockerfile                    # Multi-stage build (Angular → Maven → JRE)
 └── .env.example                  # Environment variable template
 ```
 

@@ -12,8 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
+import ca.sheridancollege.munjalru.config.CacheConfig;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,16 +29,16 @@ public class EmployeeService {
     private final DealerRepository dealerRepository;
     private final PasswordEncoder passwordEncoder;
     private final CarDealerMapper mapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
-    public List<EmployeeResponse> listEmployees(Long dealerId) {
-        return userRepository.findByDealerIdAndRole(dealerId, Role.DEALER_EMPLOYEE).stream()
-                .filter(User::isActive)
-                .map(mapper::toEmployeeResponse)
-                .toList();
+    public Page<EmployeeResponse> listEmployees(Long dealerId, Pageable pageable) {
+        return userRepository.findByDealerIdAndRoleAndActiveTrue(
+                dealerId, Role.DEALER_EMPLOYEE, pageable).map(mapper::toEmployeeResponse);
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, key = "#dealerId")
     public EmployeeResponse createEmployee(Long dealerId, CreateEmployeeRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalStateException("An account with this email already exists");
@@ -69,7 +73,9 @@ public class EmployeeService {
                 .active(true)
                 .dealerStatus(dealer.getStatus())
                 .build();
-        return mapper.toEmployeeResponse(userRepository.save(employee));
+        EmployeeResponse response = mapper.toEmployeeResponse(userRepository.save(employee));
+        auditLogService.record("EMPLOYEE_HIRED", "User", employee.getId(), dealerId, response);
+        return response;
     }
 
     @Transactional
@@ -80,14 +86,21 @@ public class EmployeeService {
                 .map(Permission::valueOf)
                 .collect(Collectors.toSet());
         employee.setPermissions(permissions);
-        return mapper.toEmployeeResponse(userRepository.save(employee));
+        EmployeeResponse response = mapper.toEmployeeResponse(userRepository.save(employee));
+        auditLogService.record("EMPLOYEE_PERMISSIONS_CHANGED", "User", employeeId,
+                dealerId, response);
+        return response;
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, key = "#dealerId")
     public void deactivateEmployee(Long dealerId, Long employeeId) {
         User employee = findEmployeeInDealer(employeeId, dealerId);
         employee.setActive(false);
-        userRepository.save(employee);
+        employee.setDeletedAt(Instant.now());
+        userRepository.delete(employee);
+        auditLogService.record("EMPLOYEE_DEACTIVATED", "User", employeeId,
+                dealerId, mapper.toEmployeeResponse(employee));
     }
 
     private User findEmployeeInDealer(Long employeeId, Long dealerId) {

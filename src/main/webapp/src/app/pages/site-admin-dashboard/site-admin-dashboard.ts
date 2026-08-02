@@ -5,12 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
-import { AppAvatar, AppButton, DataTable, PageHeader, StatCard } from '../../components';
+import { ActivityLog, AppAvatar, AppButton, DataTable, PageHeader, StatCard } from '../../components';
 
 @Component({
   selector: 'app-site-admin-dashboard',
   imports: [CommonModule, MatIconModule, MatTabsModule,
-    PageHeader, StatCard, AppButton, DataTable, AppAvatar],
+    PageHeader, StatCard, AppButton, DataTable, AppAvatar, ActivityLog],
   templateUrl: './site-admin-dashboard.html',
 })
 export class SiteAdminDashboard implements OnInit {
@@ -41,7 +41,7 @@ export class SiteAdminDashboard implements OnInit {
 
   loadStats() {
     // Fetch dealers
-    this.http.get<any>('/api/v1/dealers').subscribe(res => {
+    this.http.get<any>('/api/v1/dealers', { params: { size: 100 } }).subscribe(res => {
       const d = Array.isArray(res) ? res : (res?.content || []);
       this.dealers = d;
       this.totalDealers = res.totalElements ?? d.length;
@@ -54,16 +54,17 @@ export class SiteAdminDashboard implements OnInit {
     });
 
     // Fetch packages
-    this.http.get<any[]>('/api/v1/packages').subscribe(p => {
+    this.http.get<any>('/api/v1/packages', { params: { size: 100 } }).subscribe(res => {
+      const p = Array.isArray(res) ? res : (res?.content || []);
       this.packages = p;
-      this.totalPackages = p.length;
+      this.totalPackages = res.totalElements ?? p.length;
       this.cd.detectChanges();
     });
 
     // Fetch cars
-    this.http.get<any>('/api/v1/cars').subscribe(res => {
+    this.http.get<any>('/api/v1/cars', { params: { size: 100 } }).subscribe(res => {
       this.cars = Array.isArray(res) ? res : (res?.content || []);
-      this.totalCars = this.cars.length;
+      this.totalCars = res.totalElements ?? this.cars.length;
       this.cd.detectChanges();
     });
   }

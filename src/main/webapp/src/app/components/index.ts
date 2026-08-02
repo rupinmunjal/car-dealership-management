@@ -5,3 +5,4 @@ export * from './app-button';
 export * from './data-table';
 export * from './page-header';
 export * from './stat-card';
+export * from './activity-log';

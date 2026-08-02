@@ -20,12 +20,15 @@ describe('DealerRegister', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     http = TestBed.inject(HttpTestingController);
-    http.expectOne('/api/v1/packages').flush([{
-      id: 1,
-      name: 'Basic',
-      maxEmployeeSeats: 5,
-      maxCarListings: 25
-    }]);
+    http.expectOne('/api/v1/packages?size=100&sort=name,asc').flush({
+      content: [{
+        id: 1,
+        name: 'Basic',
+        maxEmployeeSeats: 5,
+        maxCarListings: 25
+      }],
+      totalElements: 1
+    });
     await fixture.whenStable();
   });
 

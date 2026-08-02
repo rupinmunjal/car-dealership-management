@@ -23,8 +23,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/v1/dealers/{dealerId}/employees")
@@ -45,8 +47,9 @@ public class EmployeeRestController {
     })
     @GetMapping
     @PreAuthorize("hasAnyAuthority('SITE_ADMIN', 'DEALER_ADMIN')")
-    public ResponseEntity<List<EmployeeResponse>> listEmployees(
+    public ResponseEntity<Page<EmployeeResponse>> listEmployees(
             @Parameter(description = "Dealer ID") @PathVariable Long dealerId,
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable,
             @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -59,7 +62,7 @@ public class EmployeeRestController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }
-        return ResponseEntity.ok(employeeService.listEmployees(dealerId));
+        return ResponseEntity.ok(employeeService.listEmployees(dealerId, pageable));
     }
 
     @Operation(summary = "Create employee", description = "Creates a new employee under a dealer. SITE_ADMIN and DEALER_ADMIN only. Returns 409 if seat limit exceeded or email already in use. Suspended dealers cannot create employees.")
@@ -130,7 +133,7 @@ public class EmployeeRestController {
         return ResponseEntity.ok(employeeService.updatePermissions(dealerId, employeeId, request.getPermissions()));
     }
 
-    @Operation(summary = "Deactivate employee", description = "Soft-deactivates an employee (does not delete). Deactivated employees cannot authenticate. SITE_ADMIN and DEALER_ADMIN only.")
+    @Operation(summary = "Deactivate employee", description = "Soft-deletes the employee while retaining the database row. The account is hidden and cannot authenticate. SITE_ADMIN and DEALER_ADMIN only.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Employee deactivated"),
             @ApiResponse(responseCode = "401", description = "Missing or invalid JWT",

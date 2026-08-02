@@ -22,6 +22,7 @@ public class DealerService {
 
     private final DealerRepository dealerRepository;
     private final CarDealerMapper mapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public Page<DealerResponse> findAll(Pageable pageable) {
@@ -57,7 +58,10 @@ public class DealerService {
         if (dealer.getCars() == null) {
             dealer.setCars(new ArrayList<>());
         }
-        return mapper.toDealerResponse(dealerRepository.save(dealer));
+        Dealer saved = dealerRepository.save(dealer);
+        DealerResponse response = mapper.toDealerResponse(saved);
+        auditLogService.record("DEALER_CREATED", "Dealer", saved.getId(), saved.getId(), response);
+        return response;
     }
 
     @Transactional
@@ -66,15 +70,18 @@ public class DealerService {
                 .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + id));
 
         mapper.updateDealerEntity(dealer, request);
-        return mapper.toDealerResponse(dealerRepository.save(dealer));
+        DealerResponse response = mapper.toDealerResponse(dealerRepository.save(dealer));
+        auditLogService.record("DEALER_UPDATED", "Dealer", id, id, response);
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        if (!dealerRepository.existsById(id)) {
-            throw new EntityNotFoundException("Dealer not found with id: " + id);
-        }
+        Dealer dealer = dealerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + id));
+        DealerResponse details = mapper.toDealerResponse(dealer);
         dealerRepository.deleteById(id);
+        auditLogService.record("DEALER_DELETED", "Dealer", id, id, details);
     }
 
     @Transactional(readOnly = true)

@@ -5,8 +5,11 @@ import ca.sheridancollege.munjalru.beans.Permission;
 import ca.sheridancollege.munjalru.beans.Role;
 import ca.sheridancollege.munjalru.beans.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Set;
 
@@ -27,6 +30,21 @@ import java.util.Set;
         "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
 })
 public abstract class IntegrationTestBase {
+
+    @Autowired
+    private JdbcTemplate cleanupJdbcTemplate;
+
+    /**
+     * Repository queries intentionally cannot see soft-deleted rows. Physically
+     * remove them between integration tests so their foreign keys cannot leak
+     * into another test's isolated fixture.
+     */
+    @BeforeEach
+    void purgeSoftDeletableTestRows() {
+        cleanupJdbcTemplate.update("DELETE FROM user_permissions");
+        cleanupJdbcTemplate.update("DELETE FROM _user");
+        cleanupJdbcTemplate.update("DELETE FROM car");
+    }
 
     /** A SITE_ADMIN principal with no dealer affiliation. */
     protected static UsernamePasswordAuthenticationToken siteAdminAuth() {

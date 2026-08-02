@@ -21,13 +21,16 @@ describe('DealersList', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     http = TestBed.inject(HttpTestingController);
-    http.expectOne('/api/v1/dealers').flush([{
-      id: 1,
-      name: 'Downtown Motors',
-      adminEmail: 'admin@downtown.example',
-      location: 'Toronto',
-      cars: []
-    }]);
+    http.expectOne('/api/v1/dealers?page=0&size=20&sort=id,asc').flush({
+      content: [{
+        id: 1,
+        name: 'Downtown Motors',
+        adminEmail: 'admin@downtown.example',
+        location: 'Toronto',
+        cars: []
+      }],
+      totalElements: 1
+    });
     http.expectOne('/api/v1/dealers/stats/inventory').flush({ totalInventory: 0 });
     await fixture.whenStable();
   });

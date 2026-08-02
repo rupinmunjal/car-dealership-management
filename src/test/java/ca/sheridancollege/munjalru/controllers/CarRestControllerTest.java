@@ -88,7 +88,8 @@ class CarRestControllerTest {
                 .id(1L).make("Toyota").model("Camry").modelYear(2024).build();
         Page<CarResponse> page = new PageImpl<>(List.of(car));
 
-        when(carService.findAll(any(Pageable.class))).thenReturn(page);
+        when(carService.findAll(any(), any(), any(), any(), any(), any(), any(Pageable.class)))
+                .thenReturn(page);
 
         mockMvc.perform(get("/api/v1/cars")
                         .with(authentication(siteAdminAuth())))

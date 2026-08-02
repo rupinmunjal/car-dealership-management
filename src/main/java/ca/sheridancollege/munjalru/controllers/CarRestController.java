@@ -27,6 +27,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/v1/cars")
@@ -45,15 +46,23 @@ public class CarRestController {
     })
     @GetMapping
     public ResponseEntity<Page<CarResponse>> getAllCars(
+            @RequestParam(required = false) String make,
+            @RequestParam(required = false) String model,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String search,
             @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable,
             @AuthenticationPrincipal User currentUser) {
         if (currentUser.getRole() == Role.SITE_ADMIN) {
-            return ResponseEntity.ok(carService.findAll(pageable));
+            return ResponseEntity.ok(carService.findAll(make, model, minPrice, maxPrice,
+                    year, search, pageable));
         }
         Long dealerId = currentUser.getDealer() != null
                 ? currentUser.getDealer().getId()
                 : null;
-        return ResponseEntity.ok(carService.findAllByDealer(dealerId, pageable));
+        return ResponseEntity.ok(carService.findAllByDealer(dealerId, make, model, minPrice,
+                maxPrice, year, search, pageable));
     }
 
     @Operation(summary = "Get car by ID", description = "Returns a single car. SITE_ADMIN can access any car; others are scoped to their dealer. Returns 404 if not found or out of scope.")

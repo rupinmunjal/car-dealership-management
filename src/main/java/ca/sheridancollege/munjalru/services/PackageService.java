@@ -9,8 +9,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -18,12 +18,11 @@ public class PackageService {
 
     private final PackageRepository packageRepository;
     private final CarDealerMapper mapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
-    public List<PackageResponse> findAll() {
-        return packageRepository.findAll().stream()
-                .map(mapper::toPackageResponse)
-                .toList();
+    public Page<PackageResponse> findAll(Pageable pageable) {
+        return packageRepository.findAll(pageable).map(mapper::toPackageResponse);
     }
 
     @Transactional(readOnly = true)
@@ -36,7 +35,10 @@ public class PackageService {
     @Transactional
     public PackageResponse create(PackageRequest request) {
         Package pkg = mapper.toPackageEntity(request);
-        return mapper.toPackageResponse(packageRepository.save(pkg));
+        Package saved = packageRepository.save(pkg);
+        PackageResponse response = mapper.toPackageResponse(saved);
+        auditLogService.record("PACKAGE_CREATED", "Package", saved.getId(), null, response);
+        return response;
     }
 
     @Transactional
@@ -44,14 +46,17 @@ public class PackageService {
         Package pkg = packageRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Package not found with id: " + id));
         mapper.updatePackageEntity(pkg, request);
-        return mapper.toPackageResponse(packageRepository.save(pkg));
+        PackageResponse response = mapper.toPackageResponse(packageRepository.save(pkg));
+        auditLogService.record("PACKAGE_UPDATED", "Package", id, null, response);
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        if (!packageRepository.existsById(id)) {
-            throw new EntityNotFoundException("Package not found with id: " + id);
-        }
+        Package pkg = packageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Package not found with id: " + id));
+        PackageResponse details = mapper.toPackageResponse(pkg);
         packageRepository.deleteById(id);
+        auditLogService.record("PACKAGE_DELETED", "Package", id, null, details);
     }
 }

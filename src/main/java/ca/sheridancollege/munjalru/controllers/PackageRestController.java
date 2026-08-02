@@ -17,8 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/v1/packages")
@@ -39,8 +41,9 @@ public class PackageRestController {
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     @GetMapping
-    public ResponseEntity<List<PackageResponse>> getAllPackages() {
-        return ResponseEntity.ok(packageService.findAll());
+    public ResponseEntity<Page<PackageResponse>> getAllPackages(
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(packageService.findAll(pageable));
     }
 
     @Operation(summary = "Get package by ID", description = "Returns a single subscription package. SITE_ADMIN only.")

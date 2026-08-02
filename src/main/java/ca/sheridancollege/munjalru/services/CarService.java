@@ -11,13 +11,14 @@ import ca.sheridancollege.munjalru.repositories.DealerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import ca.sheridancollege.munjalru.config.CacheConfig;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -26,25 +27,30 @@ public class CarService {
     private final CarRepository carRepository;
     private final DealerRepository dealerRepository;
     private final CarDealerMapper mapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
-    public Page<CarResponse> findAll(Pageable pageable) {
-        return carRepository.findAll(pageable).map(mapper::toCarResponse);
+    public Page<CarResponse> findAll(String make, String model, BigDecimal minPrice,
+                                     BigDecimal maxPrice, Integer year, String search,
+                                     Pageable pageable) {
+        validatePriceRange(minPrice, maxPrice);
+        return carRepository.findAllFiltered(normalize(make), normalize(model), minPrice,
+                maxPrice, year, normalize(search), pageable).map(mapper::toCarResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<CarResponse> findAllByDealer(Long dealerId, Pageable pageable) {
+    public Page<CarResponse> findAllByDealer(Long dealerId, String make, String model,
+                                             BigDecimal minPrice, BigDecimal maxPrice,
+                                             Integer year, String search, Pageable pageable) {
         if (dealerId == null) {
             return Page.empty(pageable);
         }
-        Dealer dealer = dealerRepository.findById(dealerId)
-                .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + dealerId));
-        if (dealer.getCars() == null) {
-            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        if (!dealerRepository.existsById(dealerId)) {
+            throw new EntityNotFoundException("Dealer not found with id: " + dealerId);
         }
-        return new PageImpl<>(dealer.getCars().stream()
-                .map(mapper::toCarResponse)
-                .toList(), pageable, dealer.getCars().size());
+        validatePriceRange(minPrice, maxPrice);
+        return carRepository.findAllFilteredByDealer(dealerId, normalize(make), normalize(model),
+                minPrice, maxPrice, year, normalize(search), pageable).map(mapper::toCarResponse);
     }
 
     @Transactional(readOnly = true)
@@ -70,6 +76,7 @@ public class CarService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, key = "#dealerId")
     public CarResponse createForDealer(Long dealerId, CarRequest request) {
         Dealer dealer = dealerRepository.findById(dealerId)
                 .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + dealerId));
@@ -95,24 +102,33 @@ public class CarService {
         dealer.getCars().add(car);
         dealerRepository.save(dealer);
 
-        return mapper.toCarResponse(car);
+        CarResponse response = mapper.toCarResponse(car);
+        auditLogService.record("CAR_CREATED", "Car", car.getId(), dealerId, response);
+        return response;
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, allEntries = true)
     public CarResponse update(Long id, CarRequest request) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
+        Long dealerId = dealerRepository.findByCarsId(id).map(Dealer::getId).orElse(null);
 
         mapper.updateCarEntity(car, request);
-        return mapper.toCarResponse(carRepository.save(car));
+        CarResponse response = mapper.toCarResponse(carRepository.save(car));
+        auditLogService.record("CAR_UPDATED", "Car", id, dealerId, response);
+        return response;
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, allEntries = true)
     public void delete(Long id) {
-        if (!carRepository.existsById(id)) {
-            throw new EntityNotFoundException("Car not found with id: " + id);
-        }
+        Car car = carRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
+        Long dealerId = dealerRepository.findByCarsId(id).map(Dealer::getId).orElse(null);
+        CarResponse details = mapper.toCarResponse(car);
         carRepository.deleteById(id);
+        auditLogService.record("CAR_DELETED", "Car", id, dealerId, details);
     }
 
     @Transactional(readOnly = true)
@@ -135,5 +151,21 @@ public class CarService {
         return dealerRepository.findByCarsId(carId)
                 .map(dealer -> dealer.getId().equals(dealerId))
                 .orElse(false);
+    }
+
+    private static String normalize(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private static void validatePriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+        if (minPrice != null && minPrice.signum() < 0) {
+            throw new IllegalArgumentException("minPrice cannot be negative");
+        }
+        if (maxPrice != null && maxPrice.signum() < 0) {
+            throw new IllegalArgumentException("maxPrice cannot be negative");
+        }
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("minPrice cannot be greater than maxPrice");
+        }
     }
 }

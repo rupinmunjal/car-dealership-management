@@ -22,6 +22,7 @@ public class CarDealerMapper {
                 .make(car.getMake())
                 .model(car.getModel())
                 .modelYear(car.getModelYear())
+                .price(car.getPrice())
                 .build();
     }
 
@@ -33,6 +34,7 @@ public class CarDealerMapper {
                 .make(request.getMake())
                 .model(request.getModel())
                 .modelYear(request.getModelYear())
+                .price(request.getPrice())
                 .build();
     }
 
@@ -43,6 +45,7 @@ public class CarDealerMapper {
         car.setMake(request.getMake());
         car.setModel(request.getModel());
         car.setModelYear(request.getModelYear());
+        car.setPrice(request.getPrice());
     }
 
     // ── Dealer ───────────────────────────────────────────────────

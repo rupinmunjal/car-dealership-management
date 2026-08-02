@@ -128,7 +128,7 @@ public class PackageLimitEnforcementTest extends IntegrationTestBase {
         mockMvc.perform(get("/api/v1/dealers/" + dealerA.getId() + "/employees")
                         .with(authentication(dealerAdminAuth())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content.length()").value(1));
     }
 
     @Test
@@ -176,6 +176,6 @@ public class PackageLimitEnforcementTest extends IntegrationTestBase {
         mockMvc.perform(get("/api/v1/dealers/" + dealerA.getId() + "/employees")
                         .with(authentication(dealerAdminAuth())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(0));
     }
 }
