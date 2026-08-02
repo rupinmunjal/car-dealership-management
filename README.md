@@ -71,7 +71,7 @@ redirects them to the correct dashboard automatically. No manual role selection.
 ```bash
 cd car-dealership-management
 
-# Copy the env template (already has sensible dev defaults)
+# Copy the env template
 cp .env.example .env
 
 # Generate a real JWT secret:
@@ -97,8 +97,8 @@ The app starts at **http://localhost:8080** with:
 On first boot, the `DataInitializer` creates the platform admin account using
 the `SITE_ADMIN_EMAIL` and `SITE_ADMIN_PASSWORD` env vars:
 
-- **Email:** `admin@dealership.local` (from `.env`)
-- **Password:** `Admin123!` (from `.env`)
+- **Email:** the `SITE_ADMIN_EMAIL` value from `.env`
+- **Password:** the `SITE_ADMIN_PASSWORD` value from `.env`
 
 After logging in, you'll be routed to the SITE_ADMIN dashboard.
 
@@ -148,9 +148,9 @@ Both services require these env vars (set in `.env`):
 | Suite | Count | Covers |
 |---|---|---|
 | `PackageLimitEnforcementTest` | 5 | Car listing limits, seat limits, package downgrade, deactivated employees |
-| `Phase2ManagementTest` | 13 | Role enforcement (SITE_ADMIN-only endpoints), seat limits, suspension, cross-dealer scoping |
-| `DealerScopingTest` | 13 | Cross-dealer isolation, DEALER_EMPLOYEE permissions, SITE_ADMIN access |
-| `SecurityTest` | 3 | SQL injection, XSS resistance, auth check performance |
+| `Phase2ManagementTest` | 14 | Role enforcement (SITE_ADMIN-only endpoints), seat limits, suspension, cross-dealer scoping |
+| `DealerScopingTest` | 14 | Cross-dealer isolation, DEALER_EMPLOYEE permissions, SITE_ADMIN access |
+| `SecurityTest` | 4 | SQL injection, XSS resistance, auth checks, invalid JWT handling |
 | `FunctionalTest` | 6 | End-to-end API flows |
 | `CarRestControllerTest` | 3 | Car endpoints with mocked service |
 | `SmokeTest` | 3 | Application context, health checks |
@@ -170,9 +170,9 @@ Both services require these env vars (set in `.env`):
 | `JWT_EXPIRATION_MS` | No | Token lifetime in ms (default: 86400000 = 24 h) |
 | `SITE_ADMIN_EMAIL` | **Yes** | First-run admin account email |
 | `SITE_ADMIN_PASSWORD` | **Yes** | First-run admin account password |
-| `SPRING_DATASOURCE_URL` | Prod only | PostgreSQL JDBC URL |
-| `SPRING_DATASOURCE_USERNAME` | Prod only | Database username |
-| `SPRING_DATASOURCE_PASSWORD` | Prod only | Database password |
+| `SPRING_DATASOURCE_URL` | External prod only | PostgreSQL JDBC URL; Compose sets this internally |
+| `SPRING_DATASOURCE_USERNAME` | External prod only | Database username; Compose derives this from `POSTGRES_USER` |
+| `SPRING_DATASOURCE_PASSWORD` | External prod only | Database password; Compose derives this from `POSTGRES_PASSWORD` |
 | `POSTGRES_USER` | Docker only | Postgres container user |
 | `POSTGRES_PASSWORD` | Docker only | Postgres container password |
 | `POSTGRES_DB` | Docker only | Postgres database name |
@@ -237,10 +237,8 @@ car-dealership-management/
 │       ├── guards/               # Role-based route guards
 │       ├── interceptors/         # JWT injection
 │       ├── services/             # Auth, Car, Dealer, Health
-│       └── components/           # Health indicator
-├── src/test/                     # 54 integration tests (10 suites)
-├── docs/
-│   └── DESIGN_DECISIONS.md       # Architectural tradeoffs for interview prep
+│       └── components/           # Shared UI primitives
+├── src/test/                     # 57 tests (11 suites)
 ├── compose.yaml                  # Docker Compose (staging + production + Postgres)
 ├── Dockerfile                    # Multi-stage build (Maven → JRE)
 └── .env.example                  # Environment variable template
