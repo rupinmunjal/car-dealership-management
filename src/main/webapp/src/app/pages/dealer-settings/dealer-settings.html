@@ -1,48 +1,35 @@
-<mat-toolbar color="accent">
-  <button mat-icon-button routerLink="/dashboard/dealer">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <span>Dealer Settings</span>
-</mat-toolbar>
+<div class="app-page app-page-form page-enter">
 
-<div class="page-container">
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">Configure Dealership</h2>
-      <p class="page-subtitle">Update your dealership's public profile and visibility settings.</p>
-    </div>
-  </div>
+  <app-page-header label="Configuration" title="Dealer Settings"
+                   subtitle="Update your dealership's public profile."/>
 
-  <mat-card appearance="outlined" class="form-card">
-    <mat-card-content>
-      <div *ngIf="message" class="alert alert-success">
-        <mat-icon>check_circle</mat-icon> {{ message }}
+  <app-alert type="success" [message]="message" [dismissible]="true" (dismissed)="message = ''"/>
+  <app-alert type="error" [message]="error" [dismissible]="true" (dismissed)="error = ''"/>
+
+  <mat-card class="form-card">
+    <form (ngSubmit)="onSubmit()" class="p-6 space-y-5">
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Display Name</mat-label>
+        <mat-icon matPrefix>business</mat-icon>
+        <input matInput [(ngModel)]="form.displayName" name="displayName" placeholder="e.g. Downtown Motors Toronto">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Description</mat-label>
+        <mat-icon matPrefix>description</mat-icon>
+        <textarea matInput [(ngModel)]="form.description" name="description" rows="3" placeholder="Tell customers about your dealership..."></textarea>
+      </mat-form-field>
+
+      <mat-slide-toggle [(ngModel)]="form.visible" name="visible" color="primary" class="block">
+        <span class="text-sm font-medium text-gray-700">Visible to public</span>
+      </mat-slide-toggle>
+
+      <div class="pt-2">
+        <app-btn type="submit" [loading]="submitting" icon="save" class="w-full sm:w-auto">Save Settings</app-btn>
       </div>
-      <div *ngIf="error" class="alert alert-error">
-        <mat-icon>error</mat-icon> {{ error }}
-      </div>
 
-      <form (ngSubmit)="onSubmit()" class="form-layout">
-        <mat-form-field appearance="outline">
-          <mat-label>Display Name</mat-label>
-          <input matInput [(ngModel)]="form.displayName" name="displayName" placeholder="e.g. Downtown Motors Toronto">
-          <mat-icon matPrefix>badge</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Description</mat-label>
-          <textarea matInput [(ngModel)]="form.description" name="description" rows="3" placeholder="Tell customers about your dealership..."></textarea>
-          <mat-icon matPrefix>description</mat-icon>
-        </mat-form-field>
-
-        <mat-slide-toggle [(ngModel)]="form.visible" name="visible" color="primary">
-          <span style="font-weight: 500;">Visible to public</span>
-        </mat-slide-toggle>
-
-        <button mat-flat-button color="primary" type="submit">
-          <mat-icon>save</mat-icon> Save Settings
-        </button>
-      </form>
-    </mat-card-content>
+    </form>
   </mat-card>
+
 </div>
