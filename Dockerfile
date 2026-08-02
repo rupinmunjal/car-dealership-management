@@ -1,55 +1,42 @@
-# ============================================
-# Dockerfile Template - Java/Spring Application
-# (Adapted for Java 21)
-# ============================================
+# Build Angular using a supported LTS Node release.
+FROM node:22-alpine AS frontend-build
 
-# Stage 1: Build
-# CHANGED: Using Java 21 to match your project version
-FROM maven:3.9-eclipse-temurin-21-alpine AS build
+WORKDIR /workspace/src/main/webapp
 
-WORKDIR /app
+COPY src/main/webapp/package.json src/main/webapp/package-lock.json ./
+RUN npm ci --no-audit --no-fund
 
-# Copy pom.xml first for dependency caching
-COPY pom.xml .
+COPY src/main/webapp/ ./
+RUN npm run build
+
+# Package Spring Boot with the Angular output generated above.
+FROM maven:3.9-eclipse-temurin-21-alpine AS backend-build
+
+WORKDIR /workspace
+
+COPY pom.xml ./
 RUN mvn dependency:go-offline -B
 
-# Copy source and build
 COPY src ./src
+COPY --from=frontend-build /workspace/src/main/resources/static ./src/main/resources/static
 RUN mvn package -DskipTests -B
 
-# Stage 2: Runtime
-# CHANGED: Using Java 21 Runtime
+# Run the combined application as an unprivileged user.
 FROM eclipse-temurin:21-jre-alpine
 
-# Create non-root user
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -S appuser -u 1001
+RUN addgroup -S -g 1001 appgroup \
+    && adduser -S -D -H -u 1001 -G appgroup appuser
 
 WORKDIR /app
 
-# Copy the built jar from build stage
-# This finds any .jar file in target/ and renames it to app.jar
-COPY --from=build /app/target/*.jar app.jar
-
-RUN chown -R appuser:appgroup /app
+COPY --from=backend-build /workspace/target/*.jar app.jar
+RUN chown appuser:appgroup app.jar
 
 USER appuser
 
-# Exposed port (Internal Container Port)
 EXPOSE 8080
 
-# ── Runtime environment variables (passed by docker compose or at runtime) ──
-# Required for first-run SITE_ADMIN bootstrap (see DataInitializer):
-#   SITE_ADMIN_EMAIL   – email for the initial platform admin account
-#   SITE_ADMIN_PASSWORD – password for the initial platform admin account
-#   JWT_SECRET          – Base64-encoded secret for signing JWTs
-# Optional:
-#   JWT_EXPIRATION_MS   – token lifetime in ms (default 86400000 = 24 h)
-
-# Health check
-# Uses the Actuator endpoint we enabled in SecurityConfig
-HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-# Start command
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

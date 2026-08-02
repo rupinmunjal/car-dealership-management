@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import ca.sheridancollege.munjalru.config.CacheConfig;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -73,6 +75,7 @@ public class CarService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, key = "#dealerId")
     public CarResponse createForDealer(Long dealerId, CarRequest request) {
         Dealer dealer = dealerRepository.findById(dealerId)
                 .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + dealerId));
@@ -102,6 +105,7 @@ public class CarService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, allEntries = true)
     public CarResponse update(Long id, CarRequest request) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
@@ -111,6 +115,7 @@ public class CarService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, allEntries = true)
     public void delete(Long id) {
         if (!carRepository.existsById(id)) {
             throw new EntityNotFoundException("Car not found with id: " + id);

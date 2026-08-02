@@ -7,6 +7,7 @@ import ca.sheridancollege.munjalru.dto.*;
 import ca.sheridancollege.munjalru.exception.ApiError;
 import ca.sheridancollege.munjalru.services.DealerManagementService;
 import ca.sheridancollege.munjalru.services.DealerService;
+import ca.sheridancollege.munjalru.services.DealerDashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,6 +38,7 @@ public class DealerRestController {
 
     private final DealerService dealerService;
     private final DealerManagementService dealerManagementService;
+    private final DealerDashboardService dealerDashboardService;
 
     @Operation(summary = "List all dealers", description = "Returns dealers scoped to the caller. SITE_ADMIN sees all dealers; others see only their own dealer.")
     @ApiResponses({
@@ -81,6 +83,21 @@ public class DealerRestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(dealerService.findById(id));
+    }
+
+    @GetMapping("/{id}/dashboard-summary")
+    public ResponseEntity<DealerDashboardSummary> getDashboardSummary(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (currentUser.getRole() != Role.SITE_ADMIN
+                && (currentUser.getDealer() == null
+                || !id.equals(currentUser.getDealer().getId()))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(dealerDashboardService.getSummary(id));
     }
 
     @Operation(summary = "Total inventory count", description = "Returns the total number of cars across all dealerships. Requires authentication.")

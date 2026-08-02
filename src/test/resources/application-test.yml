@@ -1,4 +1,12 @@
 spring:
+  cache:
+    type: simple
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
@@ -19,3 +27,8 @@ app:
 # Prevent DataInitializer from crashing the test context.
 SITE_ADMIN_EMAIL: test-siteadmin@example.com
 SITE_ADMIN_PASSWORD: test-password-123
+
+management:
+  health:
+    redis:
+      enabled: false

@@ -36,17 +36,20 @@ export class DealerAdminDashboard implements OnInit {
   }
 
   loadStats() {
+    this.http.get<any>(`/api/v1/dealers/${this.dealerId}/dashboard-summary`).subscribe(summary => {
+      this.location = summary.location || '';
+      this.carCount = summary.carCount ?? 0;
+      this.employeeCount = summary.employeeCount ?? 0;
+      this.packageName = summary.packageName || '';
+      this.packageLimits = summary.packageName
+        ? `${summary.maxEmployeeSeats} seats · ${summary.maxCarListings} listings`
+        : '';
+      this.cd.detectChanges();
+    });
+
     this.http.get<any>(`/api/v1/dealers/${this.dealerId}`).subscribe(d => {
-      this.location = d.location || '';
       this.cars = d.cars || [];
       this.employees = d.employees || [];
-      this.carCount = this.cars.length;
-      this.employeeCount = this.employees.length;
-      const pkg = d.dealerPackage;
-      if (pkg) {
-        this.packageName = pkg.name;
-        this.packageLimits = `${pkg.maxEmployeeSeats} seats · ${pkg.maxCarListings} listings`;
-      }
       this.cd.detectChanges();
     });
   }

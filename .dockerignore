@@ -20,6 +20,7 @@
 **/.vscode
 **/.next
 **/.cache
+**/node_modules
 **/*.dbmdl
 **/*.jfm
 **/charts
@@ -48,6 +49,7 @@ README.md
 **/nbdist
 **/nbproject/private
 **/target
+src/main/resources/static
 *.ctxt
 .mtj.tmp
 .mvn/timing.properties

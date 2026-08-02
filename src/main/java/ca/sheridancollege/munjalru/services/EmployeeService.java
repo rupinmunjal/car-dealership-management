@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
+import ca.sheridancollege.munjalru.config.CacheConfig;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,6 +36,7 @@ public class EmployeeService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, key = "#dealerId")
     public EmployeeResponse createEmployee(Long dealerId, CreateEmployeeRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalStateException("An account with this email already exists");
@@ -83,6 +86,7 @@ public class EmployeeService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, key = "#dealerId")
     public void deactivateEmployee(Long dealerId, Long employeeId) {
         User employee = findEmployeeInDealer(employeeId, dealerId);
         employee.setActive(false);

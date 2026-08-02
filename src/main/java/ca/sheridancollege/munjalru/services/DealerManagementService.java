@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import ca.sheridancollege.munjalru.config.CacheConfig;
 
 @Service
 @RequiredArgsConstructor
@@ -87,6 +89,7 @@ public class DealerManagementService {
      * hires will be blocked.
      */
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, key = "#dealerId")
     public DealerResponse assignPackage(Long dealerId, Long packageId) {
         Dealer dealer = dealerRepository.findById(dealerId)
                 .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + dealerId));

@@ -6,6 +6,14 @@
 # ──────────────────────────────────────────────────────────────────
 
 spring:
+  cache:
+    type: simple
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+
   datasource:
     url: jdbc:h2:mem:carsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
@@ -42,7 +50,13 @@ springdoc:
 
 # ── CORS origins for Angular dev server ───────────────────────────
 app:
+  demo-data:
+    password: ${DEMO_DATA_PASSWORD:Demo123!}
   cors:
     allowed-origins:
       - http://localhost:4200
-      - http://localhost:5000
+
+management:
+  health:
+    redis:
+      enabled: false
