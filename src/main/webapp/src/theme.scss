@@ -1,0 +1,48 @@
+// ===== AutoDealer Pro — Angular Material brand theme (M3) =====
+// Primary surfaces render in the electric-blue brand color (#0052FF) instead of
+// the default indigo, so every Material control is visually consistent.
+
+@use '@angular/material' as mat;
+@use 'sass:map';
+
+// Start from Material's built-in blue palette (which carries the full M3
+// structure: secondary / neutral / neutral-variant sub-palettes) and override the
+// primary tones so tone-40 lands exactly on the brand Electric Blue (#0052FF)
+// and tone-60 is the gradient partner (#4D7CFF).
+$brand-palette: map.merge(
+  mat.$blue-palette,
+  (
+    20: #003fcc,
+    25: #0047e0,
+    30: #0052ff,
+    35: #145fff,
+    40: #0052ff,
+    50: #2f6bff,
+    60: #4d7cff,
+    70: #6f96ff,
+    80: #b3caff,
+    90: #dde6ff,
+    95: #eef3ff,
+  )
+);
+
+$theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: $brand-palette,
+    tertiary: $brand-palette,
+  ),
+  typography: (
+    plain-family: 'Inter',
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
+@include mat.core();
+@include mat.all-component-themes($theme);
+
+// Keep `color="primary"` / `color="accent"` variants working with the new theme
+// (used on mat-flat-button, mat-slide-toggle, mat-tab, etc.).
+@include mat.color-variants-backwards-compatibility($theme);
