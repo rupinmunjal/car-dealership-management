@@ -1,34 +1,84 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { AppAlert, AppButton, PageHeader } from '../../components';
+import { getApiErrorMessage } from '../../utils/api-error';
 
 @Component({
   selector: 'app-dealer-register',
-  imports: [CommonModule, RouterLink, FormsModule,
-    MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatToolbarModule],
+  imports: [CommonModule, FormsModule,
+    MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule,
+    AppAlert, AppButton, PageHeader],
   templateUrl: './dealer-register.html',
-  styleUrl: './dealer-register.css',
 })
-export class DealerRegister {
-  form = { name: '', location: '', adminEmail: '', adminPassword: '' };
+export class DealerRegister implements OnInit {
+  form = {
+    name: '',
+    location: '',
+    adminEmail: '',
+    adminPassword: '',
+    packageId: null as number | null,
+    displayName: '',
+    description: ''
+  };
+  packages: any[] = [];
   message: string = '';
   error: string = '';
+  submitting = false;
+  @ViewChild('dealerForm') dealerForm?: NgForm;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cd: ChangeDetectorRef) {}
+
+  ngOnInit() {
+    this.http.get<any[]>('/api/v1/packages').subscribe({
+      next: (pkgs) => {
+        this.packages = pkgs;
+        if (pkgs && pkgs.length > 0) {
+          this.form.packageId = pkgs[0].id;
+        }
+        this.cd.detectChanges();
+      },
+      error: (e) => {
+        this.error = getApiErrorMessage(e, 'Failed to load subscription packages');
+      }
+    });
+  }
 
   onSubmit() {
+    this.submitting = true;
     this.http.post('/api/v1/dealers/register', this.form).subscribe({
-      next: () => { this.message = 'Dealer registered!'; this.error = ''; this.form = { name: '', location: '', adminEmail: '', adminPassword: '' }; },
-      error: (e) => { this.error = e.error?.message || 'Registration failed'; this.message = ''; }
+      next: () => {
+        this.message = 'Dealer registered successfully!';
+        this.error = '';
+        this.form = this.emptyForm();
+        this.dealerForm?.resetForm(this.form);
+        this.submitting = false;
+        this.cd.detectChanges();
+      },
+      error: (e) => {
+        this.error = getApiErrorMessage(e, 'Registration failed');
+        this.message = '';
+        this.submitting = false;
+        this.cd.detectChanges();
+      }
     });
+  }
+
+  private emptyForm() {
+    return {
+      name: '',
+      location: '',
+      adminEmail: '',
+      adminPassword: '',
+      packageId: this.packages.length > 0 ? this.packages[0].id : null,
+      displayName: '',
+      description: ''
+    };
   }
 }

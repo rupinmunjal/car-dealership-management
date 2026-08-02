@@ -1,56 +1,79 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button routerLink="/dashboard/site-admin">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <span>Register New Dealer</span>
-</mat-toolbar>
+<div class="app-page app-page-form page-enter">
 
-<div class="page-container">
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">Create Dealer & Admin Account</h2>
-      <p class="page-subtitle">Register a new dealership and its first DEALER_ADMIN account in one step.</p>
-    </div>
-  </div>
+  <app-page-header label="Onboarding" title="Register New Dealer"
+                   subtitle="Create a dealership, assign its package, and bootstrap its admin account in one step."/>
 
-  <mat-card appearance="outlined" class="form-card">
-    <mat-card-content>
-      <div *ngIf="message" class="alert alert-success">
-        <mat-icon>check_circle</mat-icon> {{ message }}
+  <app-alert type="success" [message]="message" [dismissible]="true" (dismissed)="message = ''"/>
+  <app-alert type="error" [message]="error" [dismissible]="true" (dismissed)="error = ''"/>
+
+  <mat-card class="form-card">
+    <form #dealerForm="ngForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+      <section aria-labelledby="dealer-details-heading">
+        <div class="mb-4">
+          <h2 id="dealer-details-heading" class="text-base font-semibold text-gray-900">Dealer details</h2>
+          <p class="mt-1 text-sm text-gray-500">Basic dealership information and subscription limits.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Dealer Name</mat-label>
+            <mat-icon matPrefix>store</mat-icon>
+            <input matInput [(ngModel)]="form.name" name="name" required autocomplete="organization" placeholder="e.g. Downtown Motors">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Location</mat-label>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <input matInput [(ngModel)]="form.location" name="location" required autocomplete="address-level2" placeholder="e.g. Toronto, ON">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Subscription Package</mat-label>
+            <mat-select [(ngModel)]="form.packageId" name="packageId" required placeholder="Select a package">
+              <mat-option *ngFor="let pkg of packages" [value]="pkg.id">
+                {{ pkg.name }} ({{ pkg.maxEmployeeSeats }} seats · {{ pkg.maxCarListings }} listings)
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Display Name (Optional)</mat-label>
+            <mat-icon matPrefix>business</mat-icon>
+            <input matInput [(ngModel)]="form.displayName" name="displayName" placeholder="e.g. Downtown Motors Toronto">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full md:col-span-2">
+            <mat-label>Description (Optional)</mat-label>
+            <mat-icon matPrefix>description</mat-icon>
+            <textarea matInput [(ngModel)]="form.description" name="description" rows="2" placeholder="Brief description..."></textarea>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section aria-labelledby="admin-account-heading" class="border-t border-gray-200 pt-5">
+        <div class="mb-4">
+          <h2 id="admin-account-heading" class="text-base font-semibold text-gray-900">Admin account</h2>
+          <p class="mt-1 text-sm text-gray-500">Credentials for the dealership's first administrator.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Admin Email</mat-label>
+            <mat-icon matPrefix>email</mat-icon>
+            <input matInput type="email" [(ngModel)]="form.adminEmail" name="adminEmail" required autocomplete="email" placeholder="admin@dealer.com">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Admin Password</mat-label>
+            <mat-icon matPrefix>lock</mat-icon>
+            <input matInput type="password" [(ngModel)]="form.adminPassword" name="adminPassword" required autocomplete="new-password" placeholder="••••••••">
+          </mat-form-field>
+        </div>
+      </section>
+
+      <div class="flex justify-end border-t border-gray-200 pt-5">
+        <app-btn type="submit" [disabled]="dealerForm.invalid === true" [loading]="submitting" icon="add_business" class="w-full sm:w-auto">Register Dealer</app-btn>
       </div>
-      <div *ngIf="error" class="alert alert-error">
-        <mat-icon>error</mat-icon> {{ error }}
-      </div>
-
-      <form (ngSubmit)="onSubmit()" class="form-layout">
-        <mat-form-field appearance="outline">
-          <mat-label>Dealer Name</mat-label>
-          <input matInput [(ngModel)]="form.name" name="name" required placeholder="e.g. Downtown Motors">
-          <mat-icon matPrefix>business</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Location</mat-label>
-          <input matInput [(ngModel)]="form.location" name="location" required placeholder="e.g. Toronto, ON">
-          <mat-icon matPrefix>location_on</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Admin Email</mat-label>
-          <input matInput type="email" [(ngModel)]="form.adminEmail" name="adminEmail" required placeholder="admin@downtownmotors.com">
-          <mat-icon matPrefix>email</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Admin Password</mat-label>
-          <input matInput type="password" [(ngModel)]="form.adminPassword" name="adminPassword" required>
-          <mat-icon matPrefix>lock</mat-icon>
-        </mat-form-field>
-
-        <button mat-flat-button color="primary" type="submit">
-          <mat-icon>add</mat-icon> Register Dealer
-        </button>
-      </form>
-    </mat-card-content>
+    </form>
   </mat-card>
 </div>
