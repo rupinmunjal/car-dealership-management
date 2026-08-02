@@ -5,9 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Entity
 @Table(name = "_user")
+@SQLDelete(sql = "UPDATE _user SET deleted_at = CURRENT_TIMESTAMP, active = false WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class User implements org.springframework.security.core.userdetails.UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,12 +58,15 @@ public class User implements org.springframework.security.core.userdetails.UserD
     /**
      * Whether this user account is active.
      * Deactivated employees ({@code active = false}) are excluded from
-     * employee listings and cannot authenticate. Their existing JWTs
-     * remain valid until expiry (same tradeoff as dealer suspension).
+     * employee listings and cannot authenticate. Soft-deleted users are
+     * additionally excluded from all Hibernate queries.
      */
     @Column(nullable = false)
     @Builder.Default
     private boolean active = true;
+
+    /** Timestamp set when the account is soft-deleted. */
+    private Instant deletedAt;
 
     /**
      * Cached dealer status extracted from the JWT at authentication time.

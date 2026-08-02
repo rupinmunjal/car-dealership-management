@@ -8,14 +8,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
 @Entity
 @Builder
 @NoArgsConstructor
+@SQLDelete(sql = "UPDATE car SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 
 public class Car {
     @Id
@@ -25,4 +30,5 @@ public class Car {
     private String model;
     private Integer modelYear;
     private BigDecimal price;
+    private Instant deletedAt;
 }

@@ -133,7 +133,7 @@ public class EmployeeRestController {
         return ResponseEntity.ok(employeeService.updatePermissions(dealerId, employeeId, request.getPermissions()));
     }
 
-    @Operation(summary = "Deactivate employee", description = "Soft-deactivates an employee (does not delete). Deactivated employees cannot authenticate. SITE_ADMIN and DEALER_ADMIN only.")
+    @Operation(summary = "Deactivate employee", description = "Soft-deletes the employee while retaining the database row. The account is hidden and cannot authenticate. SITE_ADMIN and DEALER_ADMIN only.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Employee deactivated"),
             @ApiResponse(responseCode = "401", description = "Missing or invalid JWT",

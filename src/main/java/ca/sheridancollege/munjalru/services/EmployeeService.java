@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.cache.annotation.CacheEvict;
 import ca.sheridancollege.munjalru.config.CacheConfig;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,8 @@ public class EmployeeService {
     public void deactivateEmployee(Long dealerId, Long employeeId) {
         User employee = findEmployeeInDealer(employeeId, dealerId);
         employee.setActive(false);
-        userRepository.save(employee);
+        employee.setDeletedAt(Instant.now());
+        userRepository.delete(employee);
         auditLogService.record("EMPLOYEE_DEACTIVATED", "User", employeeId,
                 dealerId, mapper.toEmployeeResponse(employee));
     }
