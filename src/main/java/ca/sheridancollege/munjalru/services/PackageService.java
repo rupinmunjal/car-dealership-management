@@ -9,8 +9,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +20,8 @@ public class PackageService {
     private final CarDealerMapper mapper;
 
     @Transactional(readOnly = true)
-    public List<PackageResponse> findAll() {
-        return packageRepository.findAll().stream()
-                .map(mapper::toPackageResponse)
-                .toList();
+    public Page<PackageResponse> findAll(Pageable pageable) {
+        return packageRepository.findAll(pageable).map(mapper::toPackageResponse);
     }
 
     @Transactional(readOnly = true)

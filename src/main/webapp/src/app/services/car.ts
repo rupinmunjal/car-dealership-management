@@ -1,7 +1,26 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface CarQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
+  make?: string;
+  model?: string;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  year?: number | null;
+  search?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +31,19 @@ export class CarService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<any[]> {
-    return this.http.get<any>(this.baseUrl).pipe(
-      map(res => Array.isArray(res) ? res : (res?.content || []))
-    );
+  getPage(query: CarQuery = {}): Observable<PageResponse<any>> {
+    let params = new HttpParams()
+      .set('page', String(query.page ?? 0))
+      .set('size', String(query.size ?? 20))
+      .set('sort', query.sort ?? 'id,asc');
+
+    for (const key of ['make', 'model', 'minPrice', 'maxPrice', 'year', 'search'] as const) {
+      const value = query[key];
+      if (value !== undefined && value !== null && String(value).trim() !== '') {
+        params = params.set(key, String(value));
+      }
+    }
+    return this.http.get<PageResponse<any>>(this.baseUrl, { params });
   }
 
   getById(id: number): Observable<any> {

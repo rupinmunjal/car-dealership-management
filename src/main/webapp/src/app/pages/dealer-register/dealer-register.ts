@@ -36,8 +36,9 @@ export class DealerRegister implements OnInit {
   constructor(private http: HttpClient, private cd: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.http.get<any[]>('/api/v1/packages').subscribe({
-      next: (pkgs) => {
+    this.http.get<any>('/api/v1/packages', { params: { size: 100, sort: 'name,asc' } }).subscribe({
+      next: (response) => {
+        const pkgs = response.content ?? response;
         this.packages = pkgs;
         if (pkgs && pkgs.length > 0) {
           this.form.packageId = pkgs[0].id;

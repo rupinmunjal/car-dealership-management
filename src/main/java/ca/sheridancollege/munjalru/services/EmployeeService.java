@@ -12,8 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,11 +28,9 @@ public class EmployeeService {
     private final CarDealerMapper mapper;
 
     @Transactional(readOnly = true)
-    public List<EmployeeResponse> listEmployees(Long dealerId) {
-        return userRepository.findByDealerIdAndRole(dealerId, Role.DEALER_EMPLOYEE).stream()
-                .filter(User::isActive)
-                .map(mapper::toEmployeeResponse)
-                .toList();
+    public Page<EmployeeResponse> listEmployees(Long dealerId, Pageable pageable) {
+        return userRepository.findByDealerIdAndRoleAndActiveTrue(
+                dealerId, Role.DEALER_EMPLOYEE, pageable).map(mapper::toEmployeeResponse);
     }
 
     @Transactional

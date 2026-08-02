@@ -4,10 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -25,4 +28,7 @@ public class CarRequest {
     @Min(value = 1900, message = "Model year must be 1900 or later")
     @Max(value = 2100, message = "Model year must be 2100 or earlier")
     private Integer modelYear;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Price cannot be negative")
+    private BigDecimal price;
 }

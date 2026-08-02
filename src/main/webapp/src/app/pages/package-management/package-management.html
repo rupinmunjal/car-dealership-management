@@ -38,6 +38,9 @@
       </tr>
     </tbody>
   </app-data-table>
+  <mat-paginator [length]="totalElements" [pageIndex]="pageIndex" [pageSize]="pageSize"
+                 [pageSizeOptions]="[10, 20, 50, 100]" showFirstLastButtons
+                 (page)="pageChanged($event)" aria-label="Select package page"/>
 
 </div>
 

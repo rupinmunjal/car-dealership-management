@@ -3,11 +3,12 @@ import { DealerService } from '../../services/dealer';
 import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AppAvatar, AppButton, DataTable, PageHeader, StatCard } from '../../components';
 
 @Component({
   selector: 'app-dealers-list',
-  imports: [CommonModule, MatIconModule,
+  imports: [CommonModule, MatIconModule, MatPaginatorModule,
     PageHeader, StatCard, AppButton, DataTable, AppAvatar],
   templateUrl: './dealers-list.html',
 })
@@ -15,6 +16,9 @@ export class DealersListComponent implements OnInit {
 
   dealers: any[] = [];
   totalInventory: number = 0;
+  totalDealers = 0;
+  pageIndex = 0;
+  pageSize = 20;
 
   constructor(
     private dealerService: DealerService,
@@ -32,10 +36,20 @@ export class DealersListComponent implements OnInit {
   }
 
   loadDealers() {
-    this.dealerService.getAll().subscribe({
-      next: (data) => { this.dealers = data; this.cd.detectChanges(); },
-      error: () => { this.dealers = []; this.cd.detectChanges(); }
+    this.dealerService.getPage(this.pageIndex, this.pageSize).subscribe({
+      next: (data) => {
+        this.dealers = data.content;
+        this.totalDealers = data.totalElements;
+        this.cd.detectChanges();
+      },
+      error: () => { this.dealers = []; this.totalDealers = 0; this.cd.detectChanges(); }
     });
+  }
+
+  pageChanged(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadDealers();
   }
 
   loadInventoryStats() {

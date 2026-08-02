@@ -22,7 +22,9 @@ import { getApiErrorMessage } from '../../utils/api-error';
 })
 export class CarAdd implements OnInit {
 
-  car = { make: '', model: '', modelYear: new Date().getFullYear() };
+  car: { make: string; model: string; modelYear: number; price?: number | null } = {
+    make: '', model: '', modelYear: new Date().getFullYear(), price: null
+  };
   dealers: any[] = [];
   selectedDealerId: number | null = null;
   isSiteAdmin = false;
@@ -89,7 +91,7 @@ export class CarAdd implements OnInit {
   }
 
   clearForm(): void {
-    this.car = { make: '', model: '', modelYear: new Date().getFullYear() };
+    this.car = { make: '', model: '', modelYear: new Date().getFullYear(), price: null };
     this.selectedDealerId = this.isSiteAdmin ? null : this.auth.getDealerId();
     this.carForm?.resetForm({ ...this.car, dealerId: this.selectedDealerId });
   }

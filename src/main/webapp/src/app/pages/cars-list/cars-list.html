@@ -9,10 +9,48 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-    <app-stat-card icon="directions_car" color="blue" label="Total Cars" [value]="cars.length" sub="In inventory"/>
-    <app-stat-card icon="check_circle" color="green" label="Available" [value]="cars.length" sub="Listed now"/>
+    <app-stat-card icon="directions_car" color="blue" label="Total Cars" [value]="totalElements" sub="In inventory"/>
+    <app-stat-card icon="check_circle" color="green" label="Available" [value]="totalElements" sub="Listed now"/>
     <app-stat-card class="col-span-2 sm:col-span-1" icon="local_offer" color="purple" label="Brands" [value]="uniqueBrandsCount" sub="Unique makes"/>
   </div>
+
+  <form (ngSubmit)="applyFilters()" class="mb-4 rounded-xl border border-slate-200 bg-white p-4">
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+      <mat-form-field appearance="outline" class="sm:col-span-2">
+        <mat-label>Search make or model</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="filters.search" name="search">
+      </mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Make</mat-label><input matInput [(ngModel)]="filters.make" name="make"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Model</mat-label><input matInput [(ngModel)]="filters.model" name="model"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Year</mat-label><input matInput type="number" [(ngModel)]="filters.year" name="year"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Min price</mat-label><input matInput type="number" min="0" [(ngModel)]="filters.minPrice" name="minPrice"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Max price</mat-label><input matInput type="number" min="0" [(ngModel)]="filters.maxPrice" name="maxPrice"></mat-form-field>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <mat-form-field appearance="outline" class="w-52">
+        <mat-label>Sort by</mat-label>
+        <mat-select [(ngModel)]="sort" name="sort" (selectionChange)="applyFilters()">
+          <mat-option value="id,asc">Oldest first</mat-option>
+          <mat-option value="id,desc">Newest first</mat-option>
+          <mat-option value="make,asc">Make A–Z</mat-option>
+          <mat-option value="modelYear,desc">Year newest</mat-option>
+          <mat-option value="price,asc">Price low to high</mat-option>
+          <mat-option value="price,desc">Price high to low</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <app-btn type="submit" icon="filter_alt">Apply Filters</app-btn>
+      <app-btn type="button" variant="outline" icon="filter_alt_off" (clicked)="clearFilters()">Clear</app-btn>
+    </div>
+    @if (activeFilters.length) {
+      <mat-chip-set aria-label="Active car filters" class="mt-2">
+        <mat-chip *ngFor="let filter of activeFilters" (removed)="clearFilter(filter.key)">
+          {{ filter.label }}
+          <button matChipRemove [attr.aria-label]="'Remove ' + filter.label"><mat-icon>cancel</mat-icon></button>
+        </mat-chip>
+      </mat-chip-set>
+    }
+  </form>
 
   <!-- Table -->
   <app-data-table [rows]="cars" emptyIcon="directions_car" emptyTitle="No cars found"
@@ -26,6 +64,7 @@
         <th>Make</th>
         <th>Model</th>
         <th>Year</th>
+        <th>Price</th>
         <th *ngIf="isAdmin">Actions</th>
       </tr>
     </thead>
@@ -40,6 +79,7 @@
         </td>
         <td class="text-gray-600">{{ car.model }}</td>
         <td><span class="chip chip-brand">{{ car.modelYear }}</span></td>
+        <td class="text-gray-600">{{ car.price == null ? 'Not set' : (car.price | currency:'CAD':'symbol-narrow':'1.0-0') }}</td>
         <td *ngIf="isAdmin">
           <app-btn variant="danger" icon="delete" ariaLabel="Delete car" title="Delete car"
                    (clicked)="deleteCar(car.id)"/>
@@ -47,5 +87,8 @@
       </tr>
     </tbody>
   </app-data-table>
+  <mat-paginator [length]="totalElements" [pageIndex]="pageIndex" [pageSize]="pageSize"
+                 [pageSizeOptions]="[10, 20, 50, 100]" showFirstLastButtons
+                 (page)="pageChanged($event)" aria-label="Select car inventory page"/>
 
 </div>

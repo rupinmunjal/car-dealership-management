@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @Entity
@@ -22,4 +24,5 @@ public class Car {
     private String make;
     private String model;
     private Integer modelYear;
+    private BigDecimal price;
 }

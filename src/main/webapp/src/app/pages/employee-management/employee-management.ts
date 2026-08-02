@@ -8,6 +8,7 @@ import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dial
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AppAlert, AppAvatar, AppButton, DataTable, PageHeader } from '../../components';
 import { getApiErrorMessage } from '../../utils/api-error';
 
@@ -15,7 +16,7 @@ import { getApiErrorMessage } from '../../utils/api-error';
   selector: 'app-employee-management',
   imports: [CommonModule, FormsModule,
     MatIconModule, MatDialogModule,
-    MatFormFieldModule, MatInputModule, MatSlideToggleModule,
+    MatFormFieldModule, MatInputModule, MatSlideToggleModule, MatPaginatorModule,
     AppAlert, AppAvatar, AppButton, DataTable, PageHeader],
   templateUrl: './employee-management.html',
 })
@@ -28,6 +29,9 @@ export class EmployeeManagement implements OnInit {
   availablePermissions = ['CAN_ADD_CAR', 'CAN_EDIT_CAR', 'CAN_DELETE_CAR'];
   dialogRef: MatDialogRef<any> | null = null;
   private dealerId: number | null = null;
+  totalElements = 0;
+  pageIndex = 0;
+  pageSize = 20;
 
   @ViewChild('createDialog') createDialog!: TemplateRef<any>;
   @ViewChild('permissionsDialog') permissionsDialog!: TemplateRef<any>;
@@ -45,10 +49,22 @@ export class EmployeeManagement implements OnInit {
   }
 
   load() {
-    this.http.get<any[]>(`/api/v1/dealers/${this.dealerId}/employees`).subscribe({
-      next: d => { this.employees = d; this.cd.detectChanges(); },
+    this.http.get<any>(`/api/v1/dealers/${this.dealerId}/employees`, {
+      params: { page: this.pageIndex, size: this.pageSize, sort: 'id,asc' }
+    }).subscribe({
+      next: d => {
+        this.employees = d.content ?? [];
+        this.totalElements = d.totalElements ?? this.employees.length;
+        this.cd.detectChanges();
+      },
       error: e => { this.error = getApiErrorMessage(e, 'Failed to load employees'); this.cd.detectChanges(); }
     });
+  }
+
+  pageChanged(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.load();
   }
 
   openCreateDialog() {

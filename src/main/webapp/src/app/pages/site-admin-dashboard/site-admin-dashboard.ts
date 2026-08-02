@@ -41,7 +41,7 @@ export class SiteAdminDashboard implements OnInit {
 
   loadStats() {
     // Fetch dealers
-    this.http.get<any>('/api/v1/dealers').subscribe(res => {
+    this.http.get<any>('/api/v1/dealers', { params: { size: 100 } }).subscribe(res => {
       const d = Array.isArray(res) ? res : (res?.content || []);
       this.dealers = d;
       this.totalDealers = res.totalElements ?? d.length;
@@ -54,16 +54,17 @@ export class SiteAdminDashboard implements OnInit {
     });
 
     // Fetch packages
-    this.http.get<any[]>('/api/v1/packages').subscribe(p => {
+    this.http.get<any>('/api/v1/packages', { params: { size: 100 } }).subscribe(res => {
+      const p = Array.isArray(res) ? res : (res?.content || []);
       this.packages = p;
-      this.totalPackages = p.length;
+      this.totalPackages = res.totalElements ?? p.length;
       this.cd.detectChanges();
     });
 
     // Fetch cars
-    this.http.get<any>('/api/v1/cars').subscribe(res => {
+    this.http.get<any>('/api/v1/cars', { params: { size: 100 } }).subscribe(res => {
       this.cars = Array.isArray(res) ? res : (res?.content || []);
-      this.totalCars = this.cars.length;
+      this.totalCars = res.totalElements ?? this.cars.length;
       this.cd.detectChanges();
     });
   }
