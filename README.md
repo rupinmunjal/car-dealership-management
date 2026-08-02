@@ -1,5 +1,7 @@
 # Car Dealership Management System
 
+[![CI](https://github.com/rupinmunjal/car-dealership-management/actions/workflows/ci.yml/badge.svg)](https://github.com/rupinmunjal/car-dealership-management/actions/workflows/ci.yml)
+
 A full-stack web application for managing car dealerships with role-based access
 control, built with **Spring Boot 3.5** (Java 21) and **Angular 21** (Angular Material).
 Designed as a portfolio/showcase project demonstrating JWT authentication,
