@@ -109,4 +109,11 @@ public class SecurityTest extends IntegrationTestBase {
         long duration = System.currentTimeMillis() - startTime;
         assertTrue(duration < 200, "Authorization check too slow: " + duration + "ms");
     }
+
+    @Test
+    public void shouldRejectInvalidJwtAsUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/packages")
+                        .header("Authorization", "Bearer invalid-token"))
+                .andExpect(status().isUnauthorized());
+    }
 }

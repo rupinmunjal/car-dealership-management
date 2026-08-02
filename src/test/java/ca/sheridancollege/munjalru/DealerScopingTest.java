@@ -7,6 +7,7 @@ import ca.sheridancollege.munjalru.beans.User;
 import ca.sheridancollege.munjalru.dto.CarRequest;
 import ca.sheridancollege.munjalru.dto.DealerRequest;
 import ca.sheridancollege.munjalru.repositories.*;
+import ca.sheridancollege.munjalru.services.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,11 +42,15 @@ public class DealerScopingTest extends IntegrationTestBase {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
     private Dealer dealerA;
     private Dealer dealerB;
 
     @BeforeEach
     void setUp() {
+        carRepository.deleteAll();
         userRepository.deleteAll();
         dealerRepository.deleteAll();
 
@@ -75,6 +80,31 @@ public class DealerScopingTest extends IntegrationTestBase {
                         .with(authentication(dealerAdminAuth(dealerA))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @Test
+    void dealerAdminCanAddCarWithBearerJwt() throws Exception {
+        User adminA = userRepository.save(User.builder()
+                .email("jwt-admin@test.com")
+                .password("unused")
+                .role(Role.DEALER_ADMIN)
+                .dealer(dealerA)
+                .build());
+        String token = jwtService.generateToken(adminA);
+        CarRequest car = CarRequest.builder()
+                .make("Honda")
+                .model("Accord")
+                .modelYear(2026)
+                .build();
+
+        mockMvc.perform(post("/api/v1/cars")
+                        .param("dealerId", dealerA.getId().toString())
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(car)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.make").value("Honda"))
+                .andExpect(jsonPath("$.model").value("Accord"));
     }
 
     @Test
