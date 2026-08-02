@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -34,10 +34,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
@@ -56,7 +56,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Check for hardcoded secrets
         run: |
@@ -73,51 +73,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and start production container
-        run: |
-          docker compose build production
-          docker compose up -d production database
+        run: docker compose up --build --detach --wait app
 
       - name: Wait for services to be ready
         run: |
-          echo "Waiting for database to be healthy..."
-          timeout 60 bash -c 'until docker inspect car-dealership-db --format="{{.State.Health.Status}}" 2>/dev/null | grep -q "healthy"; do echo "Waiting for database..."; sleep 3; done'
-          echo "✅ Database is healthy!"
-
-          echo ""
-          echo "Waiting for production container to start (max 90 seconds)..."
-
-          for i in {1..18}; do
-            STATUS=$(docker inspect car-dealership-production --format="{{.State.Status}}" 2>/dev/null || echo "unknown")
-            HEALTH=$(docker inspect car-dealership-production --format="{{.State.Health.Status}}" 2>/dev/null || echo "none")
-
-            echo "Attempt $i/18: Status=$STATUS, Health=$HEALTH"
-
-            if [ "$STATUS" = "running" ] && [ "$HEALTH" = "healthy" ]; then
-              echo "✅ Container is running and healthy!"
-              break
-            fi
-
-            if [ "$STATUS" = "restarting" ] || [ "$STATUS" = "exited" ]; then
-              echo "❌ Container is $STATUS - showing logs:"
-              docker compose logs production
-              exit 1
-            fi
-
-            sleep 5
-          done
-
-          STATUS=$(docker inspect car-dealership-production --format="{{.State.Status}}" 2>/dev/null)
-          if [ "$STATUS" != "running" ]; then
-            echo "❌ Container failed to start properly"
-            docker compose logs production
-            exit 1
-          fi
+          docker compose ps
+          curl --fail --retry 12 --retry-delay 5 --retry-connrefused \
+            http://localhost:8080/actuator/health
 
       - name: Show container status and logs
         run: |
@@ -125,17 +93,17 @@ jobs:
           docker compose ps
           echo ""
           echo "=== Production Logs (last 100 lines) ==="
-          docker compose logs --tail=100 production
+          docker compose logs --tail=100 app
 
       - name: Verify production deployment
         run: |
           echo "Checking production health endpoint..."
-          curl -f http://localhost:6001/actuator/health || exit 1
+          curl --fail http://localhost:8080/actuator/health
           echo "✅ Production deployment verified!"
 
       - name: Verify production security
         run: |
-          RESPONSE=$(curl -s http://localhost:6001/nonexistent-endpoint-12345)
+          RESPONSE=$(curl --silent http://localhost:8080/nonexistent-endpoint-12345)
           if echo "$RESPONSE" | grep -qi "stack\\|trace\\|exception"; then
             echo "⚠️ WARNING: Stack traces may be exposed in production!"
           else
@@ -146,17 +114,17 @@ jobs:
         run: |
           echo "Running smoke tests against production..."
 
-          STATUS=$(curl -s http://localhost:6001/actuator/health | grep "UP")
+          STATUS=$(curl --silent http://localhost:8080/actuator/health | grep "UP")
           if [ -z "$STATUS" ]; then echo "❌ Health check failed"; exit 1; fi
 
-          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost:6001/index.html)
+          HTTP_CODE=$(curl --output /dev/null --silent --write-out "%{http_code}\n" http://localhost:8080/index.html)
           if [ "$HTTP_CODE" != "200" ]; then echo "❌ Index page failed (Code: $HTTP_CODE)"; exit 1; fi
 
           echo "✅ Smoke tests passed!"
 
       - name: Cleanup
         if: always()
-        run: docker compose down
+        run: docker compose down --volumes --remove-orphans
 
   production-summary:
     name: Production Summary
@@ -169,7 +137,7 @@ jobs:
           echo "============================================"
           echo "  PRODUCTION DEPLOYMENT READY"
           echo "============================================"
-          echo "  Branch:      main"
+          echo "  Branch:      ${{ github.head_ref || github.ref_name }}"
           echo "  Environment: PRODUCTION"
-          echo "  Port:        6001"
+          echo "  Port:        8080"
           echo "============================================"
