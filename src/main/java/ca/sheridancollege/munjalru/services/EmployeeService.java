@@ -28,6 +28,7 @@ public class EmployeeService {
     private final DealerRepository dealerRepository;
     private final PasswordEncoder passwordEncoder;
     private final CarDealerMapper mapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public Page<EmployeeResponse> listEmployees(Long dealerId, Pageable pageable) {
@@ -71,7 +72,9 @@ public class EmployeeService {
                 .active(true)
                 .dealerStatus(dealer.getStatus())
                 .build();
-        return mapper.toEmployeeResponse(userRepository.save(employee));
+        EmployeeResponse response = mapper.toEmployeeResponse(userRepository.save(employee));
+        auditLogService.record("EMPLOYEE_HIRED", "User", employee.getId(), dealerId, response);
+        return response;
     }
 
     @Transactional
@@ -82,7 +85,10 @@ public class EmployeeService {
                 .map(Permission::valueOf)
                 .collect(Collectors.toSet());
         employee.setPermissions(permissions);
-        return mapper.toEmployeeResponse(userRepository.save(employee));
+        EmployeeResponse response = mapper.toEmployeeResponse(userRepository.save(employee));
+        auditLogService.record("EMPLOYEE_PERMISSIONS_CHANGED", "User", employeeId,
+                dealerId, response);
+        return response;
     }
 
     @Transactional
@@ -91,6 +97,8 @@ public class EmployeeService {
         User employee = findEmployeeInDealer(employeeId, dealerId);
         employee.setActive(false);
         userRepository.save(employee);
+        auditLogService.record("EMPLOYEE_DEACTIVATED", "User", employeeId,
+                dealerId, mapper.toEmployeeResponse(employee));
     }
 
     private User findEmployeeInDealer(Long employeeId, Long dealerId) {

@@ -26,6 +26,7 @@ public class DealerManagementService {
     private final PackageRepository packageRepository;
     private final PasswordEncoder passwordEncoder;
     private final CarDealerMapper mapper;
+    private final AuditLogService auditLogService;
 
     /**
      * Creates a new Dealer and its initial DEALER_ADMIN user in one
@@ -68,7 +69,9 @@ public class DealerManagementService {
         userRepository.save(admin);
         dealer.getUsers().add(admin);
 
-        return mapper.toDealerResponse(dealer);
+        DealerResponse response = mapper.toDealerResponse(dealer);
+        auditLogService.record("DEALER_REGISTERED", "Dealer", dealer.getId(), dealer.getId(), response);
+        return response;
     }
 
     /**
@@ -79,7 +82,9 @@ public class DealerManagementService {
         Dealer dealer = dealerRepository.findById(dealerId)
                 .orElseThrow(() -> new EntityNotFoundException("Dealer not found with id: " + dealerId));
         dealer.setStatus(newStatus);
-        return mapper.toDealerResponse(dealerRepository.save(dealer));
+        DealerResponse response = mapper.toDealerResponse(dealerRepository.save(dealer));
+        auditLogService.record("DEALER_STATUS_CHANGED", "Dealer", dealerId, dealerId, response);
+        return response;
     }
 
     /**
@@ -96,7 +101,9 @@ public class DealerManagementService {
         Package pkg = packageRepository.findById(packageId)
                 .orElseThrow(() -> new EntityNotFoundException("Package not found with id: " + packageId));
         dealer.setDealerPackage(pkg);
-        return mapper.toDealerResponse(dealerRepository.save(dealer));
+        DealerResponse response = mapper.toDealerResponse(dealerRepository.save(dealer));
+        auditLogService.record("PACKAGE_ASSIGNED", "Dealer", dealerId, dealerId, response);
+        return response;
     }
 
     /**
@@ -116,6 +123,8 @@ public class DealerManagementService {
         if (request.getVisible() != null) {
             dealer.setVisible(request.getVisible());
         }
-        return mapper.toDealerResponse(dealerRepository.save(dealer));
+        DealerResponse response = mapper.toDealerResponse(dealerRepository.save(dealer));
+        auditLogService.record("DEALER_SETTINGS_UPDATED", "Dealer", dealerId, dealerId, response);
+        return response;
     }
 }

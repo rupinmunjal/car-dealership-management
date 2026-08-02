@@ -27,6 +27,7 @@ public class CarService {
     private final CarRepository carRepository;
     private final DealerRepository dealerRepository;
     private final CarDealerMapper mapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public Page<CarResponse> findAll(String make, String model, BigDecimal minPrice,
@@ -101,7 +102,9 @@ public class CarService {
         dealer.getCars().add(car);
         dealerRepository.save(dealer);
 
-        return mapper.toCarResponse(car);
+        CarResponse response = mapper.toCarResponse(car);
+        auditLogService.record("CAR_CREATED", "Car", car.getId(), dealerId, response);
+        return response;
     }
 
     @Transactional
@@ -109,18 +112,23 @@ public class CarService {
     public CarResponse update(Long id, CarRequest request) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
+        Long dealerId = dealerRepository.findByCarsId(id).map(Dealer::getId).orElse(null);
 
         mapper.updateCarEntity(car, request);
-        return mapper.toCarResponse(carRepository.save(car));
+        CarResponse response = mapper.toCarResponse(carRepository.save(car));
+        auditLogService.record("CAR_UPDATED", "Car", id, dealerId, response);
+        return response;
     }
 
     @Transactional
     @CacheEvict(cacheNames = CacheConfig.DEALER_DASHBOARD_CACHE, allEntries = true)
     public void delete(Long id) {
-        if (!carRepository.existsById(id)) {
-            throw new EntityNotFoundException("Car not found with id: " + id);
-        }
+        Car car = carRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
+        Long dealerId = dealerRepository.findByCarsId(id).map(Dealer::getId).orElse(null);
+        CarResponse details = mapper.toCarResponse(car);
         carRepository.deleteById(id);
+        auditLogService.record("CAR_DELETED", "Car", id, dealerId, details);
     }
 
     @Transactional(readOnly = true)

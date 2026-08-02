@@ -5,12 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
-import { AppAvatar, AppButton, DataTable, PageHeader, StatCard } from '../../components';
+import { ActivityLog, AppAvatar, AppButton, DataTable, PageHeader, StatCard } from '../../components';
 
 @Component({
   selector: 'app-dealer-admin-dashboard',
   imports: [CommonModule, MatIconModule, MatTabsModule,
-    PageHeader, StatCard, AppButton, DataTable, AppAvatar],
+    PageHeader, StatCard, AppButton, DataTable, AppAvatar, ActivityLog],
   templateUrl: './dealer-admin-dashboard.html',
 })
 export class DealerAdminDashboard implements OnInit {
