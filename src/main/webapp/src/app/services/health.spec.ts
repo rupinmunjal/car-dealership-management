@@ -13,6 +13,7 @@ describe('Health', () => {
     });
     service = TestBed.inject(Health);
     httpMock = TestBed.inject(HttpTestingController);
+    httpMock.expectOne('/actuator/health').flush({ status: 'UP' });
   });
 
   afterEach(() => {
@@ -62,4 +63,3 @@ describe('Health', () => {
     });
   });
 });
-
