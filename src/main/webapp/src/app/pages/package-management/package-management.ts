@@ -1,40 +1,43 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { MatTableModule } from '@angular/material/table';
-import { MatCardModule } from '@angular/material/card';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatChipsModule } from '@angular/material/chips';
+import { AppAvatar, AppButton, DataTable, PageHeader } from '../../components';
 
 @Component({
   selector: 'app-package-management',
   imports: [CommonModule, FormsModule,
-    MatTableModule, MatCardModule, MatToolbarModule, MatButtonModule,
-    MatIconModule, MatTooltipModule, MatDialogModule,
-    MatFormFieldModule, MatInputModule, MatChipsModule],
+    MatIconModule, MatDialogModule,
+    MatFormFieldModule, MatInputModule,
+    AppAvatar, AppButton, DataTable, PageHeader],
   templateUrl: './package-management.html',
-  styleUrl: './package-management.css',
 })
 export class PackageManagement implements OnInit {
   packages: any[] = [];
-  columns = ['name', 'seats', 'listings', 'actions'];
   form = { name: '', maxEmployeeSeats: 1, maxCarListings: 1 };
   editingId: number | null = null;
   dialogRef: MatDialogRef<any> | null = null;
+
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
 
-  constructor(private http: HttpClient, private dialog: MatDialog) {}
+  constructor(
+    private http: HttpClient,
+    private dialog: MatDialog,
+    private cd: ChangeDetectorRef
+  ) {}
 
   ngOnInit() { this.load(); }
 
-  load() { this.http.get<any[]>('/api/v1/packages').subscribe(d => this.packages = d); }
+  load() {
+    this.http.get<any[]>('/api/v1/packages').subscribe(d => {
+      this.packages = d;
+      this.cd.detectChanges();
+    });
+  }
 
   openCreateDialog() {
     this.form = { name: '', maxEmployeeSeats: 1, maxCarListings: 1 };

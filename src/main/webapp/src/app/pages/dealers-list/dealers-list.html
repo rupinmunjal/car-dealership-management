@@ -1,111 +1,62 @@
-<div class="page-container">
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">🏢 Dealers Management</h2>
-      <p class="page-subtitle">Manage and view all dealers in the network</p>
-    </div>
-    <div class="page-actions">
-      <a mat-flat-button *ngIf="isAdmin" color="primary" routerLink="/dealers/add">
-        <mat-icon>add</mat-icon> Add Dealer
-      </a>
-      <a mat-stroked-button routerLink="/">
-        <mat-icon>arrow_back</mat-icon> Home
-      </a>
-    </div>
+<div class="app-page page-enter">
+
+  <app-page-header label="Network" title="Dealers"
+                   subtitle="Manage all dealerships in the network">
+    <ng-container header-actions>
+      <app-btn *ngIf="isAdmin" icon="add_business" routerLink="/dealers/register">Register Dealer</app-btn>
+    </ng-container>
+  </app-page-header>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+    <app-stat-card icon="business" color="blue" label="Total Dealers" [value]="dealers.length" sub="In network"/>
+    <app-stat-card icon="location_on" color="green" label="Locations" [value]="dealers.length" sub="Dealership sites"/>
+    <app-stat-card class="col-span-2 sm:col-span-1" icon="directions_car" color="purple" label="Inventory" [value]="totalInventory" sub="Cars across dealers"/>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="stats-row">
-    <mat-card appearance="outlined">
-      <mat-card-content class="stat-card">
-        <mat-icon class="stat-icon blue">business</mat-icon>
-        <div>
-          <span class="stat-value">{{ dealers.length }}</span>
-          <span class="stat-label">Total Dealers</span>
-        </div>
-      </mat-card-content>
-    </mat-card>
+  <!-- Table -->
+  <app-data-table [rows]="dealers" emptyIcon="store" emptyTitle="No dealers yet"
+                  emptyText="Register your first dealership to get started."
+                  [emptyActionLink]="isAdmin ? '/dealers/register' : undefined"
+                  emptyActionLabel="Register Dealer"
+                  [emptyActionHidden]="!isAdmin">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Cars</th>
+        <th *ngIf="isAdmin">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let d of dealers">
+        <td class="text-gray-400 text-xs font-mono">{{ d.id }}</td>
+        <td>
+          <div class="flex items-center gap-3">
+            <app-avatar [name]="d.name" color="purple" [size]="32"/>
+            <span class="min-w-0">
+              <span class="block font-medium text-gray-900">{{ d.name }}</span>
+              <span class="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                <mat-icon class="chip-icon !text-[13px] text-gray-400">mail_outline</mat-icon>
+                {{ d.adminEmail || 'No admin assigned' }}
+              </span>
+            </span>
+          </div>
+        </td>
+        <td>
+          <span class="flex items-center gap-1 text-gray-500">
+            <mat-icon class="text-[14px] w-3.5 h-3.5 text-gray-400">location_on</mat-icon>
+            {{ d.location }}
+          </span>
+        </td>
+        <td><span class="chip chip-brand">{{ d.cars ? d.cars.length : 0 }}</span></td>
+        <td *ngIf="isAdmin">
+          <app-btn variant="danger" icon="delete" ariaLabel="Delete dealer" title="Delete dealer"
+                   (clicked)="deleteDealer(d.id)"/>
+        </td>
+      </tr>
+    </tbody>
+  </app-data-table>
 
-    <mat-card appearance="outlined">
-      <mat-card-content class="stat-card">
-        <mat-icon class="stat-icon green">location_on</mat-icon>
-        <div>
-          <span class="stat-value">{{ dealers.length }}</span>
-          <span class="stat-label">Active Locations</span>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card appearance="outlined">
-      <mat-card-content class="stat-card">
-        <mat-icon class="stat-icon purple">inventory_2</mat-icon>
-        <div>
-          <span class="stat-value">{{ totalInventory }}</span>
-          <span class="stat-label">Total Inventory</span>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Dealers Table -->
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Dealers List</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="table-container">
-      <table mat-table [dataSource]="dealers" class="full-width-table">
-
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let dealer">{{ dealer.id }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Dealer Name</th>
-          <td mat-cell *matCellDef="let dealer">
-            <div class="cell-with-avatar">
-              <div class="avatar purple-bg">{{ dealer.name ? dealer.name[0].toUpperCase() : 'D' }}</div>
-              {{ dealer.name }}
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="location">
-          <th mat-header-cell *matHeaderCellDef>Location</th>
-          <td mat-cell *matCellDef="let dealer">
-            <mat-icon class="loc-icon">location_on</mat-icon>
-            {{ dealer.location }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="cars">
-          <th mat-header-cell *matHeaderCellDef>Cars</th>
-          <td mat-cell *matCellDef="let dealer">
-            <mat-chip>{{ dealer.cars ? dealer.cars.length : 0 }}</mat-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let dealer">
-            <button mat-icon-button color="warn" (click)="deleteDealer(dealer.id)" matTooltip="Delete">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
-            <mat-icon class="empty-icon">store</mat-icon>
-            <h3>No dealers found</h3>
-            <p>Get started by adding your first dealer.</p>
-            <a mat-flat-button color="primary" *ngIf="isAdmin" routerLink="/dealers/add">Add First Dealer</a>
-          </td>
-        </tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
 </div>

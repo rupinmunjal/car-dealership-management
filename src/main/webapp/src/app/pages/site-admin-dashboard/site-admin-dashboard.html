@@ -1,82 +1,135 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="sidenav.toggle()">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span>AutoDealer Pro — SITE ADMIN</span>
-  <span class="spacer"></span>
-  <app-health-indicator></app-health-indicator>
-  <button mat-button (click)="logout()">
-    <mat-icon>logout</mat-icon> Logout
-  </button>
-</mat-toolbar>
+<div class="app-page page-enter">
 
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #sidenav mode="side" opened class="sidenav">
-    <mat-nav-list>
-      <div style="padding: 20px 16px 12px;">
-        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Management</div>
+  <app-page-header label="Platform" title="Platform Overview" [showDashboard]="false"
+                   subtitle="Manage dealerships, packages, and monitor your entire platform."/>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <app-stat-card icon="business" color="blue" label="Dealers" [value]="totalDealers" [sub]="activeDealersSub"/>
+    <app-stat-card icon="directions_car" color="green" label="Total Cars" [value]="totalCars" sub="Across all dealers"/>
+    <app-stat-card icon="inventory_2" color="purple" label="Packages" [value]="totalPackages" sub="Subscription tiers"/>
+    <app-stat-card icon="people" color="amber" label="Employees" [value]="totalEmployees" sub="Across dealers"/>
+  </div>
+
+  <!-- Sections -->
+  <mat-tab-group class="dashboard-tabs">
+    <mat-tab label="Overview">
+      <div class="pt-5">
+        <h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400 mb-3">Quick Actions</h2>
+        <div class="flex flex-wrap gap-3">
+          <app-btn icon="add_business" routerLink="/dealers/register">Register Dealer</app-btn>
+          <app-btn variant="outline" icon="inventory_2" routerLink="/packages">Manage Packages</app-btn>
+          <app-btn variant="outline" icon="directions_car" routerLink="/cars">View All Cars</app-btn>
+        </div>
       </div>
-      <a mat-list-item routerLink="/dealers" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>business</mat-icon> Dealers
-      </a>
-      <a mat-list-item routerLink="/dealers/register" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>add_business</mat-icon> Register Dealer
-      </a>
-      <a mat-list-item routerLink="/packages" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>inventory_2</mat-icon> Packages
-      </a>
-      <a mat-list-item routerLink="/cars" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>directions_car</mat-icon> All Cars
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
+    </mat-tab>
 
-  <mat-sidenav-content class="sidenav-content">
-    <div class="page-container">
-      <h2 class="page-title">Platform Overview</h2>
-      <p class="admin-welcome">Manage dealerships, subscription packages, and monitor the entire platform from one place.</p>
-
-      <div class="dashboard-grid">
-        <mat-card class="dashboard-card" routerLink="/dealers" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper blue">
-              <mat-icon>business</mat-icon>
-            </div>
-            <mat-card-title>Manage Dealers</mat-card-title>
-            <p>View, edit, suspend, or delete dealerships across the platform</p>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="dashboard-card" routerLink="/dealers/register" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper green">
-              <mat-icon>add_business</mat-icon>
-            </div>
-            <mat-card-title>Register Dealer</mat-card-title>
-            <p>Create a new dealership with its own admin account and package assignment</p>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="dashboard-card" routerLink="/packages" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper purple">
-              <mat-icon>inventory_2</mat-icon>
-            </div>
-            <mat-card-title>Subscription Packages</mat-card-title>
-            <p>Define seat limits and car listing caps for each subscription tier</p>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="dashboard-card" routerLink="/cars" appearance="outlined">
-          <mat-card-content>
-            <div class="card-icon-wrapper orange">
-              <mat-icon>directions_car</mat-icon>
-            </div>
-            <mat-card-title>All Cars</mat-card-title>
-            <p>Browse the complete inventory across all registered dealerships</p>
-          </mat-card-content>
-        </mat-card>
+    <mat-tab label="Dealers">
+      <div class="pt-5">
+        <app-data-table [rows]="dealers" emptyIcon="store" emptyTitle="No dealers yet"
+                        emptyText="Register your first dealership to get started."
+                        emptyActionLink="/dealers/register" emptyActionLabel="Register Dealer">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Cars</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of dealers">
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-avatar [name]="d.name" color="blue"/>
+                  <span class="min-w-0">
+                    <span class="block font-medium text-gray-900">{{ d.name }}</span>
+                    <span class="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                      <mat-icon class="chip-icon !text-[13px] text-gray-400">mail_outline</mat-icon>
+                      {{ d.adminEmail || 'No admin assigned' }}
+                    </span>
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="flex items-center gap-1 text-gray-500">
+                  <mat-icon class="text-[14px] w-3.5 h-3.5 text-gray-400">location_on</mat-icon>
+                  {{ d.location }}
+                </span>
+              </td>
+              <td><span class="chip chip-brand">{{ d.cars ? d.cars.length : 0 }}</span></td>
+              <td>
+                <span class="chip"
+                      [class.chip-green]="d.status !== 'SUSPENDED'"
+                      [class.chip-red]="d.status === 'SUSPENDED'">
+                  <span class="w-1.5 h-1.5 rounded-full inline-block"
+                        [class.bg-emerald-500]="d.status !== 'SUSPENDED'"
+                        [class.bg-red-500]="d.status === 'SUSPENDED'"></span>
+                  {{ d.status || 'ACTIVE' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </app-data-table>
       </div>
-    </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    </mat-tab>
+
+    <mat-tab label="Packages">
+      <div class="pt-5">
+        <app-data-table [rows]="packages" [fixedLayout]="true"
+                        emptyIcon="inventory_2" emptyTitle="No packages defined"
+                        emptyText="Create your first subscription package."
+                        emptyActionLink="/packages" emptyActionLabel="Create Package">
+          <thead>
+            <tr>
+              <th class="w-1/3">Package</th>
+              <th class="w-1/3">Employee Seats</th>
+              <th class="w-1/3">Car Listings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of packages">
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-avatar [name]="p.name" color="purple"/>
+                  <span class="font-semibold text-gray-900">{{ p.name }}</span>
+                </div>
+              </td>
+              <td><span class="chip chip-brand min-w-[116px] justify-center"><mat-icon class="chip-icon">person</mat-icon> {{ p.maxEmployeeSeats }} seats</span></td>
+              <td><span class="chip chip-amber min-w-[116px] justify-center"><mat-icon class="chip-icon">directions_car</mat-icon> {{ p.maxCarListings }} listings</span></td>
+            </tr>
+          </tbody>
+        </app-data-table>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Cars">
+      <div class="pt-5">
+        <app-data-table [rows]="cars" emptyIcon="directions_car" emptyTitle="No cars found"
+                        emptyText="Get started by adding your first vehicle."
+                        emptyActionLink="/cars/add" emptyActionLabel="Add First Car">
+          <thead>
+            <tr>
+              <th>Make</th>
+              <th>Model</th>
+              <th>Year</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of cars">
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-avatar [name]="c.make" color="green"/>
+                  <span class="font-medium text-gray-900">{{ c.make }}</span>
+                </div>
+              </td>
+              <td class="text-gray-600">{{ c.model }}</td>
+              <td><span class="chip chip-brand">{{ c.modelYear }}</span></td>
+            </tr>
+          </tbody>
+        </app-data-table>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+</div>

@@ -1,24 +1,70 @@
-import { Component } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { HealthIndicator } from '../../components/health-indicator/health-indicator';
+import { MatTabsModule } from '@angular/material/tabs';
+import { AppAvatar, AppButton, DataTable, PageHeader, StatCard } from '../../components';
 
 @Component({
   selector: 'app-site-admin-dashboard',
-  imports: [CommonModule, RouterLink,
-    MatToolbarModule, MatSidenavModule, MatListModule,
-    MatIconModule, MatButtonModule, MatCardModule, HealthIndicator],
+  imports: [CommonModule, MatIconModule, MatTabsModule,
+    PageHeader, StatCard, AppButton, DataTable, AppAvatar],
   templateUrl: './site-admin-dashboard.html',
-  styleUrl: './site-admin-dashboard.css',
 })
-export class SiteAdminDashboard {
-  constructor(private authService: AuthService, private router: Router) {}
-  logout() { this.authService.logout(); this.router.navigate(['/login']); }
+export class SiteAdminDashboard implements OnInit {
+  dealers: any[] = [];
+  packages: any[] = [];
+  cars: any[] = [];
+  totalDealers = 0;
+  activeDealers = 0;
+  totalCars = 0;
+  totalPackages = 0;
+  totalEmployees = 0;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private http: HttpClient,
+    private cd: ChangeDetectorRef
+  ) {}
+
+  ngOnInit() {
+    this.loadStats();
+  }
+
+  /** "N active" dealers sub-stat with the count emphasized in green. */
+  get activeDealersSub(): string {
+    return `<span class="text-emerald-600 font-semibold">${this.activeDealers}</span> active`;
+  }
+
+  loadStats() {
+    // Fetch dealers
+    this.http.get<any>('/api/v1/dealers').subscribe(res => {
+      const d = Array.isArray(res) ? res : (res?.content || []);
+      this.dealers = d;
+      this.totalDealers = res.totalElements ?? d.length;
+      this.activeDealers = d.filter((x: any) => x.status === 'ACTIVE').length;
+      this.totalEmployees = 0;
+      d.forEach((dealer: any) => {
+        if (dealer.employees) this.totalEmployees += dealer.employees.length;
+      });
+      this.cd.detectChanges();
+    });
+
+    // Fetch packages
+    this.http.get<any[]>('/api/v1/packages').subscribe(p => {
+      this.packages = p;
+      this.totalPackages = p.length;
+      this.cd.detectChanges();
+    });
+
+    // Fetch cars
+    this.http.get<any>('/api/v1/cars').subscribe(res => {
+      this.cars = Array.isArray(res) ? res : (res?.content || []);
+      this.totalCars = this.cars.length;
+      this.cd.detectChanges();
+    });
+  }
 }

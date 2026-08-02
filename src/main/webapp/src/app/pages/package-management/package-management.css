@@ -1,6 +1,0 @@
-/* Package Management — table/button/dialog from global */
-.package-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}

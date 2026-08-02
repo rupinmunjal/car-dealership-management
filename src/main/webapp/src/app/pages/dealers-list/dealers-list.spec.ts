@@ -1,23 +1,45 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 
-import { DealersList } from './dealers-list';
+import { DealersListComponent } from './dealers-list';
 
 describe('DealersList', () => {
-  let component: DealersList;
-  let fixture: ComponentFixture<DealersList>;
+  let component: DealersListComponent;
+  let fixture: ComponentFixture<DealersListComponent>;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DealersList]
+      imports: [DealersListComponent],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DealersList);
+    fixture = TestBed.createComponent(DealersListComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
+    http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/v1/dealers').flush([{
+      id: 1,
+      name: 'Downtown Motors',
+      adminEmail: 'admin@downtown.example',
+      location: 'Toronto',
+      cars: []
+    }]);
+    http.expectOne('/api/v1/dealers/stats/inventory').flush({ totalInventory: 0 });
     await fixture.whenStable();
   });
 
+  afterEach(() => http.verify());
+
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the dealer admin email beneath the dealer name', () => {
+    expect(fixture.nativeElement.textContent).toContain('Downtown Motors');
+    expect(fixture.nativeElement.textContent).toContain('admin@downtown.example');
   });
 });
