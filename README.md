@@ -327,9 +327,12 @@ car-dealership-management/
 
 ---
 
-## 📄 License
+## 🎯 Project Purpose
 
-This project is part of academic coursework at Sheridan College.
+This portfolio project demonstrates production-oriented full-stack engineering,
+including role-based access control, secure REST APIs, relational persistence,
+caching, audit logging, automated testing, CI pipelines, and containerized local
+deployment.
 
 ## 👥 Authors
 
