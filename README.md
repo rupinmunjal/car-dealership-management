@@ -1,6 +1,11 @@
 # Car Dealership Management System
 
+![CI](https://github.com/rupinmunjal/car-dealership-management/actions/workflows/ci.yml/badge.svg)
 [![CI](https://github.com/rupinmunjal/car-dealership-management/actions/workflows/ci.yml/badge.svg)](https://github.com/rupinmunjal/car-dealership-management/actions/workflows/ci.yml)
+
+**Live Demo:** [http://155.248.233.214](http://155.248.233.214)
+
+*Spring Boot · Angular · PostgreSQL · Redis · Docker · Oracle Cloud · GitHub Actions*
 
 A full-stack web application for managing car dealerships with role-based access
 control, built with **Spring Boot 3.5** (Java 21) and **Angular 21** (Angular Material).
@@ -213,6 +218,17 @@ flowchart LR
 The architecture decisions behind package downgrades, JWT authentication, and
 Redis cache scope are recorded in [`docs/adr`](docs/adr/).
 
+## 🚀 Deployment
+
+The application is deployed on **Oracle Cloud Infrastructure** (OCI) using:
+- Ubuntu 24.04 VM (Always Free tier)
+- Docker Compose (Spring Boot + PostgreSQL + Redis + Nginx reverse proxy)
+- Nginx reverse proxy routing port 80 → 8080
+
+**Live URL:** http://155.248.233.214
+
+The CI pipeline (GitHub Actions) builds and publishes the Docker image to GHCR on every push to `main`. Deployment is done manually via SSH + `docker compose pull && docker compose up -d`.
+
 ---
 
 ## 🧪 Testing
@@ -329,10 +345,7 @@ car-dealership-management/
 
 ## 🎯 Project Purpose
 
-This portfolio project demonstrates production-oriented full-stack engineering,
-including role-based access control, secure REST APIs, relational persistence,
-caching, audit logging, automated testing, CI pipelines, and containerized local
-deployment.
+This project is deployed live and demonstrates production-oriented full-stack engineering including RBAC, secure REST APIs, relational persistence, Redis caching, audit logging, rate limiting, automated CI/CD, and containerized cloud deployment.
 
 ## 👥 Authors
 
