@@ -31,6 +31,9 @@ spring:
 
 # ── JWT ───────────────────────────────────────────────────────────
 app:
+  observability:
+    prometheus:
+      password: ${PROMETHEUS_SCRAPE_PASSWORD:prometheus-local-password}
   rate-limit:
     enabled: true
     general-per-minute: 100

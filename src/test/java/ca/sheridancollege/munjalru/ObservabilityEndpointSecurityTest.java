@@ -7,9 +7,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.http.MediaType.ALL;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,8 +30,23 @@ class ObservabilityEndpointSecurityTest extends IntegrationTestBase {
     }
 
     @Test
-    void prometheusEndpointIsPublicForScraping() throws Exception {
-        mockMvc.perform(get("/actuator/prometheus"))
+    void prometheusEndpointRejectsAnonymousRequests() throws Exception {
+        mockMvc.perform(get("/actuator/prometheus").accept(ALL))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("WWW-Authenticate", "Basic realm=\"prometheus\""));
+    }
+
+    @Test
+    void prometheusEndpointRejectsInvalidCredentials() throws Exception {
+        mockMvc.perform(get("/actuator/prometheus")
+                        .with(httpBasic("prometheus", "wrong-password")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void prometheusEndpointAcceptsScrapeCredentials() throws Exception {
+        mockMvc.perform(get("/actuator/prometheus")
+                        .with(httpBasic("prometheus", "prometheus-local-password")))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/plain"));
     }

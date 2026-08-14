@@ -145,6 +145,11 @@ seconds over the private `app-network`. Grafana uses the provisioned Prometheus
 data source and loads Grafana.com dashboard ID 12900, currently titled
 **SpringBoot APM Dashboard**, during its first startup.
 
+The Prometheus endpoint requires dedicated HTTP Basic authentication. Compose
+configures Prometheus to send the credentials automatically. Set
+`PROMETHEUS_SCRAPE_PASSWORD` to a strong value before deploying publicly; the
+provided default is intended only for local development.
+
 Built-in Micrometer metrics cover JVM memory and garbage collection, process
 uptime, HTTP request rates and latency histograms, HikariCP database pools, and
 application logging. The project adds these custom counters:
@@ -335,6 +340,7 @@ The CI pipeline (GitHub Actions) builds and publishes the Docker image to GHCR o
 | `POSTGRES_DB` | Docker only | Postgres database name |
 | `SPRING_DATA_REDIS_HOST` | External prod only | Redis host; Compose sets this internally |
 | `SPRING_DATA_REDIS_PORT` | No | Redis port (default: 6379) |
+| `PROMETHEUS_SCRAPE_PASSWORD` | Production | Password used only for Prometheus metric scraping |
 
 ---
 

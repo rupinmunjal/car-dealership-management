@@ -5,11 +5,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,6 +42,37 @@ public class SecurityConfig {
     private final RateLimitFilter rateLimitFilter;
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain prometheusSecurityFilterChain(
+            HttpSecurity http,
+            @Value("${app.observability.prometheus.password}") String prometheusPassword) throws Exception {
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        UserDetails prometheusUser = User.withUsername("prometheus")
+                .password(passwordEncoder.encode(prometheusPassword))
+                .roles("PROMETHEUS")
+                .build();
+        DaoAuthenticationProvider prometheusAuthenticationProvider =
+                new DaoAuthenticationProvider(new InMemoryUserDetailsManager(prometheusUser));
+        prometheusAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        AuthenticationEntryPoint prometheusAuthenticationEntryPoint = (request, response, exception) -> {
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"prometheus\"");
+            response.setStatus(401);
+        };
+
+        return http
+                .securityMatcher("/actuator/prometheus")
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+                .authenticationProvider(prometheusAuthenticationProvider)
+                .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(prometheusAuthenticationEntryPoint))
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(prometheusAuthenticationEntryPoint))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         boolean isLocal = isLocalProfileActive();
 
@@ -46,7 +86,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     authorize
                             .requestMatchers("/actuator/health").permitAll()
-                            .requestMatchers("/actuator/prometheus").permitAll()
                             .requestMatchers("/api/v1/auth/**").permitAll()
                             .requestMatchers("/", "/index.html", "/login", "/register").permitAll()
                             .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.html").permitAll()
