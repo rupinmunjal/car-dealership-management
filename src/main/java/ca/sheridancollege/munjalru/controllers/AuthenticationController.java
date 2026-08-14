@@ -4,6 +4,7 @@ import ca.sheridancollege.munjalru.exception.ApiError;
 import ca.sheridancollege.munjalru.models.AuthenticationRequest;
 import ca.sheridancollege.munjalru.models.AuthenticationResponse;
 import ca.sheridancollege.munjalru.services.AuthenticationService;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication", description = "Registration and login (public)")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+    private final MeterRegistry meterRegistry;
 
     @Operation(summary = "Register a new user", description = "Creates a new user account. The first user is auto-assigned SITE_ADMIN; subsequent users get the default role.")
     @ApiResponses({
@@ -48,6 +51,11 @@ public class AuthenticationController {
     @SecurityRequirements
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+        try {
+            return ResponseEntity.ok(authenticationService.authenticate(request));
+        } catch (AuthenticationException ex) {
+            meterRegistry.counter("dealership.auth.failures").increment();
+            throw ex;
+        }
     }
 }

@@ -8,6 +8,7 @@ import ca.sheridancollege.munjalru.exception.ApiError;
 import ca.sheridancollege.munjalru.services.DealerManagementService;
 import ca.sheridancollege.munjalru.services.DealerService;
 import ca.sheridancollege.munjalru.services.DealerDashboardService;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,6 +40,7 @@ public class DealerRestController {
     private final DealerService dealerService;
     private final DealerManagementService dealerManagementService;
     private final DealerDashboardService dealerDashboardService;
+    private final MeterRegistry meterRegistry;
 
     @Operation(summary = "List all dealers", description = "Returns dealers scoped to the caller. SITE_ADMIN sees all dealers; others see only their own dealer.")
     @ApiResponses({
@@ -125,7 +127,9 @@ public class DealerRestController {
     @PostMapping
     @PreAuthorize("hasAuthority('SITE_ADMIN')")
     public ResponseEntity<DealerResponse> addDealer(@Valid @RequestBody DealerRequest dealerRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(dealerService.create(dealerRequest));
+        DealerResponse createdDealer = dealerService.create(dealerRequest);
+        meterRegistry.counter("dealership.dealer.mutations", "operation", "create").increment();
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdDealer);
     }
 
     @Operation(summary = "Update a dealer", description = "Updates dealer name/location. SITE_ADMIN can update any dealer; DEALER_ADMIN can only update their own.")
@@ -154,7 +158,9 @@ public class DealerRestController {
                 || !id.equals(currentUser.getDealer().getId()))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return ResponseEntity.ok(dealerService.update(id, dealerRequest));
+        DealerResponse updatedDealer = dealerService.update(id, dealerRequest);
+        meterRegistry.counter("dealership.dealer.mutations", "operation", "update").increment();
+        return ResponseEntity.ok(updatedDealer);
     }
 
     @Operation(summary = "Delete a dealer", description = "Deletes a dealer and all associated cars/employees. SITE_ADMIN only. Returns 409 if dealer has employees.")
@@ -173,6 +179,7 @@ public class DealerRestController {
     @PreAuthorize("hasAuthority('SITE_ADMIN')")
     public ResponseEntity<Void> deleteDealer(@PathVariable Long id) {
         dealerService.delete(id);
+        meterRegistry.counter("dealership.dealer.mutations", "operation", "delete").increment();
         return ResponseEntity.ok().build();
     }
 

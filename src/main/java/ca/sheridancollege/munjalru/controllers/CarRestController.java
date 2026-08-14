@@ -6,6 +6,7 @@ import ca.sheridancollege.munjalru.dto.CarRequest;
 import ca.sheridancollege.munjalru.dto.CarResponse;
 import ca.sheridancollege.munjalru.exception.ApiError;
 import ca.sheridancollege.munjalru.services.CarService;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,6 +38,7 @@ import java.math.BigDecimal;
 public class CarRestController {
 
     private final CarService carService;
+    private final MeterRegistry meterRegistry;
 
     @Operation(summary = "List all cars", description = "Returns cars scoped to the caller. SITE_ADMIN sees all cars; DEALER_ADMIN and DEALER_EMPLOYEE see only their dealer's inventory.")
     @ApiResponses({
@@ -123,8 +125,9 @@ public class CarRestController {
                 || !dealerId.equals(currentUser.getDealer().getId()))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(carService.createForDealer(dealerId, carRequest));
+        CarResponse createdCar = carService.createForDealer(dealerId, carRequest);
+        meterRegistry.counter("dealership.car.mutations", "operation", "create").increment();
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCar);
     }
 
     @Operation(summary = "Update a car", description = "Updates an existing car. Requires SITE_ADMIN, DEALER_ADMIN, or CAN_EDIT_CAR permission. Non-admin users can only edit their own dealer's cars.")
@@ -153,7 +156,9 @@ public class CarRestController {
                 || !carService.belongsToDealer(id, currentUser.getDealer().getId()))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return ResponseEntity.ok(carService.update(id, carRequest));
+        CarResponse updatedCar = carService.update(id, carRequest);
+        meterRegistry.counter("dealership.car.mutations", "operation", "update").increment();
+        return ResponseEntity.ok(updatedCar);
     }
 
     @Operation(summary = "Delete a car", description = "Deletes a car by ID. Requires SITE_ADMIN, DEALER_ADMIN, or CAN_DELETE_CAR permission. Non-admin users can only delete their own dealer's cars.")
@@ -179,6 +184,7 @@ public class CarRestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         carService.delete(id);
+        meterRegistry.counter("dealership.car.mutations", "operation", "delete").increment();
         return ResponseEntity.ok().build();
     }
 }
