@@ -6,6 +6,9 @@
 # ──────────────────────────────────────────────────────────────────
 
 spring:
+  application:
+    name: car-dealership-management
+
   # For local development, activate the "local" profile explicitly:
   #   SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
   # For production/Docker:
@@ -43,13 +46,19 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized
   health:
     defaults:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
 
 # ── Logging defaults (profiles may override) ──────────────────────
 logging:

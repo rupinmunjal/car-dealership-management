@@ -17,7 +17,7 @@ services:
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       SITE_ADMIN_EMAIL: ${SITE_ADMIN_EMAIL:-admin@dealership.local}
       SITE_ADMIN_PASSWORD: ${SITE_ADMIN_PASSWORD:-Admin123!}
-      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,metrics,prometheus
     depends_on:
       database:
         condition: service_healthy

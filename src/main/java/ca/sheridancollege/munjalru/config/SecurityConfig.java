@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     authorize
                             .requestMatchers("/actuator/health").permitAll()
+                            .requestMatchers("/actuator/prometheus").permitAll()
                             .requestMatchers("/api/v1/auth/**").permitAll()
                             .requestMatchers("/", "/index.html", "/login", "/register").permitAll()
                             .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.html").permitAll()
