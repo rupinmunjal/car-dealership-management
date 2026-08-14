@@ -53,6 +53,7 @@ redirects them to the correct dashboard automatically. No manual role selection.
 - **Bucket4j** — per-IP API rate limiting
 - **Lombok** — boilerplate reduction
 - **SpringDoc OpenAPI** (2.8.9) — Swagger UI at `/swagger-ui.html`
+- **Micrometer Prometheus registry** — built-in JVM, HTTP, database, and custom application metrics
 - **Maven** — build & dependency management
 
 ### Frontend
@@ -64,9 +65,10 @@ redirects them to the correct dashboard automatically. No manual role selection.
 
 ### DevOps
 - **Docker** multi-stage Angular and Spring build
-- **Docker Compose** for the application, PostgreSQL, and Redis
+- **Docker Compose** for the application, PostgreSQL, Redis, Prometheus, and Grafana
 - **GitHub Actions** — backend tests, Angular build, container build, and GHCR publishing
-- **Spring Boot Actuator** — health checks
+- **Spring Boot Actuator** — health checks and Prometheus metrics
+- **Prometheus + Grafana** — five-second metric scraping and a provisioned Spring Boot dashboard
 - **Maven Wrapper** — no Maven install required
 
 ---
@@ -85,8 +87,8 @@ docker compose up --build
 
 Open **http://localhost:8080**. Docker builds Angular, packages Spring Boot,
 starts PostgreSQL and Redis, waits for them to become healthy, and then starts
-the application. No local Java, Node.js, Maven, npm, or PostgreSQL installation
-is required.
+the application, Prometheus, and Grafana. No local Java, Node.js, Maven, npm,
+or PostgreSQL installation is required.
 
 Press `Ctrl+C` to stop the stack. If started in detached mode, stop the
 stack with:
@@ -105,6 +107,68 @@ docker compose down --volumes
 Compose has local demonstration defaults, including
 `admin@dealership.local` / `Admin123!`. Create a `.env` file with secure values
 before exposing the application outside your machine.
+
+---
+
+## 🐳 Docker Services
+
+| Service | Purpose | Access |
+|---|---|---|
+| `app` | Angular frontend and Spring Boot API | http://localhost:8080 |
+| `database` | PostgreSQL production database | Internal Compose network only |
+| `redis` | Dealer dashboard summary cache | Internal Compose network only |
+| `prometheus` | Scrapes and stores application metrics | `docker compose port prometheus 9090` |
+| `grafana` | Displays the provisioned Spring Boot dashboard | `docker compose port grafana 3000` |
+
+Prometheus and Grafana publish their container ports without fixed host ports.
+Docker selects available host ports each time the services are created.
+
+---
+
+## 💚 Health Monitoring
+
+The existing Spring Boot Actuator health endpoint remains available at:
+
+```text
+http://localhost:8080/actuator/health
+```
+
+Docker uses this endpoint for the application container health check. The
+endpoint remains public and retains its existing response and detail settings.
+
+---
+
+## 📊 Observability
+
+Prometheus scrapes `/actuator/prometheus` from the application every five
+seconds over the private `app-network`. Grafana uses the provisioned Prometheus
+data source and loads Grafana.com dashboard ID 12900, currently titled
+**SpringBoot APM Dashboard**, during its first startup.
+
+Built-in Micrometer metrics cover JVM memory and garbage collection, process
+uptime, HTTP request rates and latency histograms, HikariCP database pools, and
+application logging. The project adds these custom counters:
+
+- `dealership_auth_failures_total` for failed login attempts.
+- `dealership_car_mutations_total{operation="create|update|delete"}` for successful car mutations.
+- `dealership_dealer_mutations_total{operation="create|update|delete"}` for successful dealer mutations.
+
+Find the dynamically assigned host ports after starting Compose:
+
+```bash
+docker compose port prometheus 9090
+docker compose port grafana 3000
+```
+
+Open the returned Grafana address and log in with the default credentials
+`admin` / `admin`. Grafana may ask you to change the password on first login.
+Open **Dashboards → Spring Boot → SpringBoot APM Dashboard**, select
+`car-dealership-management` in the application filter, and wait for the next
+five-second scrape.
+
+To verify Prometheus directly, open `/targets` on the returned Prometheus
+address. The `car-dealership-app` target should report `UP` with no scrape
+error.
 
 ---
 
@@ -336,7 +400,11 @@ car-dealership-management/
 │       └── components/           # Shared UI primitives
 ├── src/test/                     # Backend unit and integration tests
 ├── docs/adr/                     # Architecture decision records
-├── compose.yaml                  # Complete app + PostgreSQL + Redis stack
+├── grafana/
+│   ├── dashboards/               # Provisioned Grafana.com dashboard 12900
+│   └── provisioning/             # Prometheus datasource and dashboard provider
+├── prometheus.yml                # Five-second application scrape configuration
+├── compose.yaml                  # App + PostgreSQL + Redis + observability stack
 ├── Dockerfile                    # Multi-stage build (Angular → Maven → JRE)
 └── .env.example                  # Environment variable template
 ```
