@@ -303,9 +303,24 @@ The CI pipeline (GitHub Actions) builds and publishes the Docker image to GHCR o
 ## 🧪 Testing
 
 ```bash
-# Run all tests
+# Run the existing unit and MockMvc suites. Docker is not required.
 ./mvnw test
+
+# Run all tests, including Rest Assured API integration tests.
+# Docker Engine or Docker Desktop must be running.
+./mvnw verify
 ```
+
+The API integration suite starts disposable PostgreSQL 16 and Redis 7
+containers through Testcontainers. It starts the Spring Boot application on a
+random local port and never reads production database or Redis connection
+settings. No environment variables are required for the suite because the
+`api-it` profile supplies test-only JWT and bootstrap values.
+
+Integration tests are under `src/test/java/.../api` and use the `*ApiIT`
+naming convention. Maven Surefire runs the existing tests during `test`;
+Maven Failsafe runs the Rest Assured tests during `verify`. Database tables and
+Redis are cleared before every API test so scenarios do not rely on test order.
 
 ### Selected test suites
 
@@ -320,6 +335,13 @@ The CI pipeline (GitHub Actions) builds and publishes the Docker image to GHCR o
 | `SecurityTest` | Injection resistance, authentication checks, and invalid JWT handling |
 | `FunctionalTest` | End-to-end API workflows |
 | `JwtServiceTest` | Token generation, validation, and expiry |
+| `AuthenticationApiIT` | Registration, login, validation, and missing, invalid, incorrectly signed, or expired JWTs |
+| `AuthorizationApiIT` | Role enforcement, all implemented employee permissions, tenant isolation, and conflicts |
+| `CarApiIT` | HTTP CRUD, 400/404 responses, malformed JSON, pagination, filtering, and inventory statistics |
+| `DealerApiIT` | Dealer CRUD, registration, dashboard, status, package assignment, settings, and conflicts |
+| `EmployeeAuditApiIT` | Employee lifecycle, permission changes, pagination, audit access, and tenant isolation |
+| `PackageApiIT` | Package CRUD, pagination, validation, role enforcement, and 404 responses |
+| `RateLimitApiIT` | Authentication and general API limits, `Retry-After`, and `429` responses |
 
 ---
 
