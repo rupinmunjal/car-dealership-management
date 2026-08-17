@@ -104,7 +104,7 @@ public class SecurityTest extends IntegrationTestBase {
                         .param("dealerId", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(car)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         long duration = System.currentTimeMillis() - startTime;
         assertTrue(duration < 200, "Authorization check too slow: " + duration + "ms");

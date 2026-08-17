@@ -54,6 +54,6 @@ class ObservabilityEndpointSecurityTest extends IntegrationTestBase {
     @Test
     void metricsEndpointStillRequiresAuthentication() throws Exception {
         mockMvc.perform(get("/actuator/metrics"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }

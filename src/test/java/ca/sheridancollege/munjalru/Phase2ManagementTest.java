@@ -212,9 +212,8 @@ public class Phase2ManagementTest extends IntegrationTestBase {
 
     @Test
     void nullPrincipalRejectedOnEmployeeEndpoint() throws Exception {
-        // No auth → @PreAuthorize rejects anonymous → 403
         mockMvc.perform(get("/api/v1/dealers/" + dealerA.getId() + "/employees"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -222,7 +221,7 @@ public class Phase2ManagementTest extends IntegrationTestBase {
         mockMvc.perform(post("/api/v1/packages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"X\",\"maxEmployeeSeats\":1,\"maxCarListings\":1}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     // ── DEALER_EMPLOYEE also rejected from SITE_ADMIN endpoints ──

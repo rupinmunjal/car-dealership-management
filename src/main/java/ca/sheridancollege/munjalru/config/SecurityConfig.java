@@ -1,5 +1,7 @@
 package ca.sheridancollege.munjalru.config;
 
+import ca.sheridancollege.munjalru.exception.ApiError;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -25,6 +29,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,6 +45,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final Environment environment;
     private final RateLimitFilter rateLimitFilter;
+    private final ObjectMapper objectMapper;
 
     @Bean
     @Order(1)
@@ -75,6 +81,17 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         boolean isLocal = isLocalProfileActive();
+        AuthenticationEntryPoint apiAuthenticationEntryPoint = (request, response, exception) -> {
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            objectMapper.writeValue(response.getOutputStream(), ApiError.builder()
+                    .status(HttpStatus.UNAUTHORIZED.value())
+                    .error("Unauthorized")
+                    .message("Authentication is required to access this resource")
+                    .timestamp(Instant.now())
+                    .build());
+        };
 
         if (isLocal) {
             http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
@@ -98,6 +115,8 @@ public class SecurityConfig {
 
                     authorize.anyRequest().authenticated();
                 })
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(apiAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
