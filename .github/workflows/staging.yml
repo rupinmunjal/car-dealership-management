@@ -23,7 +23,18 @@ jobs:
           cache: 'maven'
 
       - name: Test
-        run: ./mvnw test
+        run: ./mvnw verify
+
+      - name: Upload Java test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-java-test-reports
+          path: |
+            target/surefire-reports/*.xml
+            target/failsafe-reports/*.xml
+          if-no-files-found: warn
+          retention-days: 14
 
   angular-build:
     name: Build Angular Frontend

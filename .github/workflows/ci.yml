@@ -28,8 +28,19 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: Run Maven tests
-        run: ./mvnw --batch-mode test
+      - name: Run Maven unit and API integration tests
+        run: ./mvnw --batch-mode verify
+
+      - name: Upload Java test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-java-test-reports
+          path: |
+            target/surefire-reports/*.xml
+            target/failsafe-reports/*.xml
+          if-no-files-found: warn
+          retention-days: 14
 
   frontend-build:
     name: Frontend build
