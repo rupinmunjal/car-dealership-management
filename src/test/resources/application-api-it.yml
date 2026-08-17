@@ -1,0 +1,35 @@
+spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 5m
+  data:
+    redis:
+      repositories:
+        enabled: false
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    show-sql: false
+
+app:
+  observability:
+    prometheus:
+      password: integration-test-prometheus-password
+  jwt:
+    secret: DdHcnCpz5Ofm9QiSbEopDNO1yuE2jfPSVdPcJPdWcdhrQ4/rZhgSHDgIbqsw/X62v7qWP8FJ8ttr/D9SW3PfTw==
+    expiration-ms: 60000
+  rate-limit:
+    enabled: true
+    general-per-minute: 1000
+    auth-per-minute: 1000
+
+SITE_ADMIN_EMAIL: bootstrap-api-it@example.com
+SITE_ADMIN_PASSWORD: bootstrap-password-123
+
+management:
+  health:
+    redis:
+      enabled: false
